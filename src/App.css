@@ -1,0 +1,75 @@
+:root {
+  --color-black: #000;
+  --color-white: #fff;
+
+  /*/////////////////////////
+  ///// COLOR TEMPLATES */
+  --primary-color: #87CBB9;
+  --primary-color-light: #bcf0e0;
+  --primary-color-x-light: #e9faf5;
+  --primary-color-dark: #569DAA;
+  --accent-color: #577D86;
+
+  /*/////////////////////////
+  ///// FONT COLORS */
+  --default-font-color: #434343;
+  --primary-font-color: #666666;
+  --secondary-font-color: gray;
+  --tertiary-font-color: #bebebe;
+
+  /*/////////////////////////
+  ///// FONT SIZES */
+  --default-font-size: 1.6rem;
+  --small-font-size: 1rem;
+  --medium-font-size: 2rem;
+  --large-font-size: 3rem;
+  --x-large-font-size: 5rem;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+  color: var(--color-black);
+  font-family: "Lato", sans-serif;
+  letter-spacing: .5px;
+}
+
+* {
+  box-sizing: inherit;
+  color: currentColor;
+}
+
+body {
+  margin: 0;
+}
+
+/* @media (max-width: 500px) {
+  body {
+    zoom: 1;
+  }
+} */
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #d3d3d3b8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d1d1;
+}
+
+input::placeholder {
+  color: #b9babc;
+}
+
+input:hover {
+  outline: none;
+}

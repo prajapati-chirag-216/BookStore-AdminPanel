@@ -1,0 +1,100 @@
+.form-group {
+    position: relative;
+}
+
+.input {
+    font-size: 1.7rem;
+    font-family: inherit;
+    width: 100%;
+    padding: 1.5rem 2rem;
+    border-radius: 2px;
+    background-color: var(--color-white);
+    border: none;
+    border-bottom: 3px solid var(--accent-color);
+    display: block;
+}
+
+.input:focus {
+    border-bottom: 3px solid green;
+    outline: none;
+    box-shadow: 0 .5rem 1rem #0002;
+}
+
+.input-textarea {
+    resize: none;
+}
+
+.input-invalid {
+    border-bottom: 3px solid orangered !important;
+}
+
+.input::placeholder {
+    color: #0009;
+    text-transform: capitalize;
+}
+
+.label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-left: 2rem;
+    margin-top: 0.7rem;
+    display: block;
+    transition: all 0.3s;
+}
+
+.input:placeholder-shown+.label {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4rem);
+    font-family: inherit;
+}
+
+
+.file-input {
+    color: inherit;
+    font-size: 1.7rem;
+    width: 100%;
+    padding: 1.5rem 2rem;
+    border-radius: 2px;
+    background-color: var(--color-white);
+    border: none;
+    border-bottom: 3px solid var(--accent-color);
+    display: block;
+    margin-bottom: 2rem;
+}
+
+.file-input>input {
+    display: none;
+}
+
+.input-label {
+    color: #0008;
+}
+
+.file-input>label {
+    cursor: pointer;
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.form-group>svg {
+    position: absolute;
+    right: 1rem;
+    top: .9rem;
+    font-size: var(--medium-font-size);
+    cursor: pointer;
+    padding: .6rem;
+    border-radius: 50%;
+    box-sizing: content-box;
+    transition: all .1s;
+    color: #0008;
+}
+
+.form-group>svg:hover {
+    background-color: #0001;
+}
+
+.form-group>svg:active {
+    background-color: #0002;
+}

@@ -1,0 +1,58 @@
+.modal-container {
+    position: absolute;
+    width: 70rem;
+    min-height: 30rem;
+    background-color: var(--primary-color-x-light);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    padding: 1rem 3rem 4rem 3rem;
+}
+
+.overlay {
+    position: absolute;
+    background-color: #0009;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    backdrop-filter: blur(2px);
+    z-index: 999;
+}
+
+.container-heading {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-black);
+    padding: 2rem 0;
+    margin-bottom: 3rem;
+}
+
+.container-title {
+    width: 100%;
+    font-size: 3rem;
+    text-transform: uppercase;
+    margin-left: 3rem;
+    line-height: 0;
+    text-align: center;
+}
+
+.container-icon {
+    display: block;
+    font-size: 3rem;
+    padding: 0.3rem 1rem;
+    border-radius: 3px;
+    transition: all .15s;
+    background-color: var(--primary-color-light);
+    cursor: pointer;
+}
+
+.container-icon:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color-x-light);
+}
+
+.container-icon:active {
+    scale: .95;
+}

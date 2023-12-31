@@ -1,0 +1,79 @@
+.filter-box {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.filter-box--selector {
+    display: flex;
+    align-items: center;
+    z-index: 100;
+    cursor: pointer;
+}
+
+.filter-box:hover .filter-box--value,
+.filter-box--value:hover {
+    top: 100%
+}
+
+.filter-box:hover img {
+    transform: rotateZ(-180deg);
+}
+
+.filter-box--value {
+    position: absolute;
+    top: -20rem;
+    left: 0;
+    display: flex;
+    width: calc(100% - 3px);
+    background-color: rgba(237, 237, 237, 0.877);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    transition: all .3s;
+    z-index: 10;
+}
+
+.filter-box--value>li {
+    list-style: none;
+    font-size: 2.2rem;
+    text-transform: capitalize;
+    cursor: pointer;
+    transition: all .3s;
+    color: var(--secondary-font-color);
+    transform-origin: center;
+    padding: .5rem 1rem;
+    border-radius: 5px;
+}
+
+.filter-box--value>li:hover {
+    color: var(--primary-font-color);
+    background-color: #0001
+}
+
+.filter-box--value>li:active {
+    background-color: #0002
+}
+
+.filter-box--selector>img {
+    width: 3.3rem;
+    margin-left: -3rem;
+    transition: all .25s;
+}
+
+.input-filter {
+    font-size: var(--medium-font-size);
+    padding: 1rem;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #b9babc;
+    cursor: pointer;
+}
+
+.input-filter:hover {
+    outline: none;
+}

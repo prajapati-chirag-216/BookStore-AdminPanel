@@ -1,0 +1,22 @@
+.auth-container {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20rem;
+}
+
+.container-heading {
+    font-size: var(--x-large-font-size);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--primary-font-color)
+}
+
+.signin-container {
+    position: relative;
+    width: 70rem;
+    background-color: #e9faf5;
+    padding: 2rem;
+}

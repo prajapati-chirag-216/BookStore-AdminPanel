@@ -1,0 +1,29 @@
+.main-container {
+    margin-top: 10rem;
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+    position: relative;
+    padding: 0 4rem;
+}
+
+.container-heading {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-size: 3.5rem;
+    padding: 0 2rem;
+    text-decoration: underline;
+    text-underline-offset: .7rem;
+    display: block;
+    text-align: center;
+    margin: 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-color);
+}
+
+.container-ctrl {
+    display: flex;
+    justify-content: space-between;
+}

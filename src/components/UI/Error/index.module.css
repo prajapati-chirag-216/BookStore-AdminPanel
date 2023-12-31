@@ -1,0 +1,17 @@
+.main {
+    margin: 20rem auto;
+    width: 90%;
+    max-width: 60rem;
+    color: var(--default-font-color);
+    font-size: xx-large;
+}
+
+.main .header {
+    font-weight: 500;
+    font-size: 10rem;
+    text-align: center;
+}
+
+.main h2 {
+    text-align: center;
+}
