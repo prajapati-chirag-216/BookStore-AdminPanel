@@ -103,7 +103,7 @@ function Form(props) {
           ([_, value]) => value !== "" && value
         )
       );
-      if (filteredCategoryData.length > 0) {
+      if (Object.keys(filteredCategoryData).length > 0) {
         dispatch(
           uiActions.setOperationState({
             status: true,

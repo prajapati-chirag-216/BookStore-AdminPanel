@@ -22,16 +22,17 @@ const ProtectedRoutes = (props) => {
 
   useLayoutEffect(() => {
     if (!loaderData.adminProfile) {
-      store.dispatch(
-        uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UNAUTHORIZED })
-      );
+      dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UNAUTHORIZED }));
       navigate("/auth", { replace: true });
     } else {
       const pathname = location.pathname;
       if (
-        pathname.endsWith("/admin") ||
+        pathname.endsWith("/admin") &&
         loaderData.adminProfile.role === ROLES.EMPLOYEE
       ) {
+        dispatch(
+          uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_INVALID_ACCESS })
+        );
         navigate("/auth", { replace: true });
       }
     }
