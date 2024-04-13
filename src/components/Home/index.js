@@ -1,21 +1,3 @@
-// import React, { Fragment } from "react";
-// import Main from "../Main";
-// import classes from "./index.module.css";
-
-// function Home() {
-//   return (
-//     <Fragment>
-//       <Main
-//         searchHolder="Search trasaction id.."
-//         title="orders"
-//         showForm={false}
-//       />
-//     </Fragment>
-//   );
-// }
-
-// export default Home;
-
 import React, { Fragment, useEffect, useState } from "react";
 import Main from "../Main";
 import Modal from "../Modal";
