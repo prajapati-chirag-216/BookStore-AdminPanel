@@ -45,7 +45,14 @@ export async function logoutAdmin() {
   const response = await AxiosInstance(config);
   return response;
 }
-
+export const searchAdmin = async (id) => {
+  const config = {
+    url: `/searchAdmin/${id}`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
 export const getAllAdmins = async () => {
   const config = {
     url: `/getAllAdmins`,
@@ -88,6 +95,15 @@ export async function deleteUser(id) {
 export const getAllProducts = async () => {
   const config = {
     url: `/getAllproducts`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
+
+export const searchProduct = async (name) => {
+  const config = {
+    url: `/searchProduct/${name}`,
     withCredentials: true,
   };
   const response = await AxiosInstance(config);
@@ -192,6 +208,15 @@ export const getAllCategories = async () => {
   return response;
 };
 
+export const searchCategory = async (name) => {
+  const config = {
+    url: `/searchCategory/${name}`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
+
 export const deleteCategory = async (id) => {
   const config = {
     method: "DELETE",
@@ -205,6 +230,15 @@ export const deleteCategory = async (id) => {
 export const getAllOrders = async () => {
   const config = {
     url: `/getAllOrders`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
+
+export const searchOrder = async (name) => {
+  const config = {
+    url: `/searchOrder/${name}`,
     withCredentials: true,
   };
   const response = await AxiosInstance(config);
@@ -257,6 +291,15 @@ export const getTodaysOrders = async () => {
 export const getAllUsers = async () => {
   const config = {
     url: `/getAllUsers`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
+
+export const searchUser = async (email) => {
+  const config = {
+    url: `/searchUser/${email}`,
     withCredentials: true,
   };
   const response = await AxiosInstance(config);

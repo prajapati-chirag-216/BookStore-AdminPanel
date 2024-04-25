@@ -115,7 +115,7 @@ function Form() {
         value={passwordState.value}
         isValid={passwordIsValid}
       />
-      <Button className="btn-large">SignIn</Button>
+      <Button className="btn-large">Sign in</Button>
     </form>
   );
 }

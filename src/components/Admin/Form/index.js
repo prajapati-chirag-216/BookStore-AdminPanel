@@ -1,24 +1,3 @@
-// import React from "react";
-// import classes from "./index.module.css";
-// import Input from "../../Input";
-// import Select from "../../Select";
-// import Button from "../../Button";
-// function Form(props) {
-//   return (
-//     <form className={classes["form"]}>
-//       <Input type="text" required={true} placeholder="Name" />
-//       <Input type="email" required={true} placeholder="email" />
-//       <div className={classes["row-inp"]} style={{ marginBottom: "2rem" }}>
-//         <Input type="password" required={true} placeholder="password" />
-//         <Select placeholder="Role" options={ROLES_LIST} />
-//       </div>
-//       <Button className="btn-large">Submit</Button>
-//     </form>
-//   );
-// }
-
-// export default Form;
-
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import classes from "./index.module.css";
 import Input from "../../Input";

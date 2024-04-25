@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import Main from "../Main";
 import Modal from "../Modal";
 import Form from "./Form";
-import { deleteOrder, getAllOrders } from "../../utils/api";
+import { deleteOrder, getAllOrders, searchOrder } from "../../utils/api";
 import {
   ACTIONS,
   OPERATIONS,
@@ -115,9 +115,7 @@ function Order() {
     setIsOpen(false);
     setAction(ACTIONS.DEFAULT);
   };
-  const fetchOrderDataHandler = async () => {
-    const orderData = await getAllOrders();
-
+  const structureRows = (orderData) => {
     const data = orderData.map((data) => ({
       id: data._id,
       products: data.orderedItems
@@ -160,6 +158,11 @@ function Order() {
     }));
     return data;
   };
+  const fetchOrderDataHandler = async () => {
+    const orderData = await getAllOrders();
+    const data = structureRows(orderData);
+    return data;
+  };
   const updateOrderHandler = async (id) => {
     openModalHandler();
     setAction(ACTIONS.UPDATE);
@@ -185,6 +188,20 @@ function Order() {
       if (err?.response?.status == 500) {
         dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
       }
+    }
+  };
+  const searchOrderHandler = async (searchId) => {
+    if (searchId !== "") {
+      const res = await searchOrder(searchId);
+      const data = structureRows(res);
+      setRowData(data);
+    } else {
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
     }
   };
   useEffect(() => {
@@ -240,6 +257,7 @@ function Order() {
         rowData={rowData}
         onUpdate={updateOrderHandler}
         onDelete={deleteOrderHandler}
+        onSearch={searchOrderHandler}
       />
     </Fragment>
   );

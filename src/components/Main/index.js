@@ -14,11 +14,14 @@ function Main(props) {
         {props.title || "Orders"}
       </h1>
       <div className={classes["container-ctrl"]}>
-        <SearchBox placeHolder={props.searchHolder || "Search here"} />
+        <SearchBox
+          placeHolder={props.searchHolder || "Search here"}
+          onSearch={props?.onSearch}
+        />
         {props.showForm && (
           <Button
             className="btn-small"
-            onClick={props.onModalOpen || null}
+            onClick={props?.onModalOpen}
             disabled={operationState.status}
           >
             {operationState.status && (
@@ -43,7 +46,7 @@ function Main(props) {
       <Table
         columns={props.columns}
         rows={props.rowData || []}
-        onUpdate={props.onUpdate}
+        onUpdate={props?.onUpdate}
         onDelete={props.onDelete}
       />
     </div>

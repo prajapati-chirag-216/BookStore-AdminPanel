@@ -31,20 +31,50 @@ function Form(props) {
       value: event.target.value.trimStart(),
     });
   };
+  const validateFile = (file) => {
+    const allowedExtensions = ["jpg", "jpeg", "png"];
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+
+    return allowedExtensions.includes(fileExtension);
+  };
 
   const imageChangeHandler = (event) => {
     let name = "";
     const files = event.target.files;
-    if (files[0]) {
+    // if (files[0]) {
+    //   Object.keys(files).forEach((key, index) => {
+    //     if (index < files.length) {
+    //       name += files[key].name + ", ";
+    //     }
+    //   });
+    // }
+    let isValid = true;
+    if (files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        if (!validateFile(files[i])) {
+          isValid = false;
+          break;
+        }
+      }
+
+      if (!isValid) {
+        alert("Please upload only jpg, jpeg, or png files.");
+        event.target.value = null;
+        setImageName("");
+        return;
+      }
+
       Object.keys(files).forEach((key, index) => {
         if (index < files.length) {
           name += files[key].name + ", ";
         }
       });
+      name = name.slice(0, -2);
     }
     name = name.slice(0, -2);
     setImageName(name);
   };
+
   // this will run on input gets out from focus
   const validateCategoryNameHandler = () =>
     dispatchCategoryName({ type: "INPUT_BLUR" });
@@ -152,6 +182,7 @@ function Form(props) {
         name="categoryName"
         value={categoryNameState.value}
       />
+
       <Input
         ref={imageRef}
         type="file"

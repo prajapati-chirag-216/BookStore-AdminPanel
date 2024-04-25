@@ -10,7 +10,7 @@ import {
   SNACKBAR_DETAILS,
 } from "../../utils/variables";
 import { uiActions } from "../../store/ui-slice";
-import { deleteProduct, getAllProducts } from "../../utils/api";
+import { deleteProduct, getAllProducts, searchProduct } from "../../utils/api";
 import {
   BorderColor as BorderColorIcon,
   DeleteForever as DeleteForeverIcon,
@@ -47,8 +47,8 @@ function Product() {
     setIsOpen(false);
     setAction(ACTIONS.DEFAULT);
   };
-  const fetchProductDataHandler = async () => {
-    const productData = await getAllProducts();
+
+  const structureRows = (productData) => {
     const data = productData.map((data) => ({
       id: data._id,
       category: data.category.name,
@@ -112,6 +112,11 @@ function Product() {
     }));
     return data;
   };
+  const fetchProductDataHandler = async () => {
+    const productData = await getAllProducts();
+    const data = structureRows(productData);
+    return data;
+  };
   const updateProductHandler = async (id) => {
     openModalHandler();
     setAction(ACTIONS.UPDATE);
@@ -140,6 +145,22 @@ function Product() {
       );
     }
   };
+
+  const searchProductHandler = async (searchName) => {
+    if (searchName !== "") {
+      const res = await searchProduct(searchName);
+      const data = structureRows(res);
+      setRowData(data);
+    } else {
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     // This will fetch Data when user comes to this route
     dispatch(
@@ -190,6 +211,7 @@ function Product() {
         rowData={rowData}
         onUpdate={updateProductHandler}
         onDelete={deleteProductHandler}
+        onSearch={searchProductHandler}
       />
     </Fragment>
   );

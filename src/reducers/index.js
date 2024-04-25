@@ -37,32 +37,67 @@ export const nameReducer = (state, action) => {
   return { value: "", isValid: null };
 };
 
+// export const emailReducer = (state, action) => {
+//   if (action.type === "INPUT_FETCH") {
+//     return {
+//       value: action.value.trim(),
+//       isValid:
+//         action.value.trim().length == 0
+//           ? null
+//           : action.value.trim().includes("@"),
+//     };
+//   }
+//   if (action.type === "USER_INPUT") {
+//     return {
+//       value: action.value.trim(),
+//       isValid:
+//         action.value.trim().includes("@") &&
+//         action.value.trim().endsWith("gmail.com"),
+//     };
+//   }
+//   if (action.type === "INPUT_BLUR") {
+//     return {
+//       value: state.value.trim(),
+//       isValid:
+//         state.value.trim().includes("@") &&
+//         state.value.trim().endsWith("gmail.com"),
+//     };
+//   }
+//   return { value: "", isValid: null };
+// };
+
+const validateEmail = (email) => {
+  // Regular expression to validate email formats
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  return emailRegex.test(email);
+};
+
 export const emailReducer = (state, action) => {
   if (action.type === "INPUT_FETCH") {
     return {
       value: action.value.trim(),
       isValid:
-        action.value.trim().length == 0
+        action.value.trim().length === 0
           ? null
-          : action.value.trim().includes("@"),
+          : validateEmail(action.value.trim()),
     };
   }
+
   if (action.type === "USER_INPUT") {
     return {
       value: action.value.trim(),
-      isValid:
-        action.value.trim().includes("@") &&
-        action.value.trim().endsWith("gmail.com"),
+      isValid: validateEmail(action.value.trim()),
     };
   }
+
   if (action.type === "INPUT_BLUR") {
     return {
       value: state.value.trim(),
-      isValid:
-        state.value.trim().includes("@") &&
-        state.value.trim().endsWith("gmail.com"),
+      isValid: validateEmail(state.value.trim()),
     };
   }
+
   return { value: "", isValid: null };
 };
 

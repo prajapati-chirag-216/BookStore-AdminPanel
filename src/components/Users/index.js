@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import Main from "../Main";
-import { getAllUsers, deleteUser } from "../../utils/api";
+import { getAllUsers, deleteUser, searchUser } from "../../utils/api";
 import {
   ACTIONS,
   OPERATIONS,
@@ -27,22 +27,12 @@ const iconStyle = {
 };
 
 function Users() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [action, setAction] = useState(ACTIONS.DEFAULT);
   const [rowData, setRowData] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
   const operationState = useSelector((state) => state.ui.operationState);
 
   const dispatch = useDispatch();
-  const openModalHandler = () => {
-    setIsOpen(true);
-  };
-  const closeModalHandler = () => {
-    setIsOpen(false);
-    setAction(ACTIONS.DEFAULT);
-  };
-  const fetchUserDataHandler = async () => {
-    const userData = await getAllUsers();
+
+  const structureRows = (userData) => {
     const data = userData.map((data) => ({
       id: data._id,
       name: data.name,
@@ -69,11 +59,12 @@ function Users() {
     }));
     return data;
   };
-  const updateUserHandler = async (id) => {
-    openModalHandler();
-    setAction(ACTIONS.UPDATE);
-    setSelectedId(id);
+  const fetchUserDataHandler = async () => {
+    const userData = await getAllUsers();
+    const data = structureRows(userData);
+    return data;
   };
+
   const deleteUserHandler = async (id) => {
     dispatch(
       uiActions.setOperationState({
@@ -97,6 +88,21 @@ function Users() {
     }
   };
 
+  const searchUserHandler = async (searchEmail) => {
+    if (searchEmail != "") {
+      const res = await searchUser(searchEmail);
+      const data = structureRows(res);
+      setRowData(data);
+    } else {
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     // This will user Data when user comes to this route
     dispatch(
@@ -110,6 +116,7 @@ function Users() {
   useEffect(() => {
     // This will fetch Data when user perfoms any operations (Add,Update,Delete)
     if (operationState.status && operationState.activity == OPERATIONS.FETCH) {
+      console.log("Came");
       fetchUserDataHandler().then((data) => {
         setRowData(data);
         dispatch(
@@ -130,9 +137,8 @@ function Users() {
         for="user"
         columns={USER_COLUMNS}
         rowData={rowData}
-        onUpdate={updateUserHandler}
+        onSearch={searchUserHandler}
         onDelete={deleteUserHandler}
-        onModalOpen={openModalHandler}
       />
     </Fragment>
   );

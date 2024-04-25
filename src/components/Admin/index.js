@@ -2,7 +2,12 @@ import React, { Fragment, useEffect, useState } from "react";
 import Main from "../Main";
 import Modal from "../Modal";
 import Form from "./Form";
-import { deleteAdmin, getAllAdmins, getAllCategories } from "../../utils/api";
+import {
+  deleteAdmin,
+  getAllAdmins,
+  getAllCategories,
+  searchAdmin,
+} from "../../utils/api";
 import {
   ACTIONS,
   ADMIN_COLUMNS,
@@ -47,45 +52,49 @@ function Admin() {
     setIsOpen(false);
     setAction(ACTIONS.DEFAULT);
   };
+
+  const structureRows = (adminData) => {
+    const data = adminData.map((data) => ({
+      id: data._id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      createdAt: `${new Date(data.createdAt).toLocaleDateString()}
+      ,
+      ${new Date(data.updatedAt).getHours()}:${new Date(
+        data.updatedAt
+      ).getMinutes()}`,
+      updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
+        ,
+        ${new Date(data.updatedAt).getHours()}:${new Date(
+        data.updatedAt
+      ).getMinutes()}`,
+      update: (
+        <BorderColorIcon
+          sx={{
+            ...iconStyle,
+            color: "var(--primary-color-dark)",
+          }}
+          onClick={updateAdminHandler.bind(null, data._id)}
+        />
+      ),
+      delete: (
+        <DeleteForeverIcon
+          sx={{
+            ...iconStyle,
+            color: "red",
+          }}
+          onClick={deleteAdminHandler.bind(null, data._id)}
+        />
+      ),
+    }));
+    return data;
+  };
+
   const fetchAdminDataHandler = async () => {
     try {
       const adminData = await getAllAdmins();
-      const data =
-        adminData &&
-        adminData.map((data) => ({
-          id: data._id,
-          name: data.name,
-          email: data.email,
-          role: data.role,
-          createdAt: `${new Date(data.createdAt).toLocaleDateString()}
-      ,
-      ${new Date(data.updatedAt).getHours()}:${new Date(
-            data.updatedAt
-          ).getMinutes()}`,
-          updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
-        ,
-        ${new Date(data.updatedAt).getHours()}:${new Date(
-            data.updatedAt
-          ).getMinutes()}`,
-          update: (
-            <BorderColorIcon
-              sx={{
-                ...iconStyle,
-                color: "var(--primary-color-dark)",
-              }}
-              onClick={updateAdminHandler.bind(null, data._id)}
-            />
-          ),
-          delete: (
-            <DeleteForeverIcon
-              sx={{
-                ...iconStyle,
-                color: "red",
-              }}
-              onClick={deleteAdminHandler.bind(null, data._id)}
-            />
-          ),
-        }));
+      const data = structureRows(adminData);
       return data;
     } catch (err) {
       return navigate("/auth", { replace: true });
@@ -124,6 +133,22 @@ function Admin() {
       );
     }
   };
+
+  const searchAdminHandler = async (searchName) => {
+    if (searchName !== "") {
+      const res = await searchAdmin(searchName);
+      const data = structureRows(res);
+      setRowData(data);
+    } else {
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     // This will admin Data when admin comes to this route
     dispatch(
@@ -132,15 +157,6 @@ function Admin() {
         activity: OPERATIONS.FETCH,
       })
     );
-    // fetchAdminDataHandler().then((data) => {
-    //   setRowData(data || []);
-    //   dispatch(
-    //     uiActions.setOperationState({
-    //       status: false,
-    //       activity: OPERATIONS.DEFAULT,
-    //     })
-    //   );
-    // });
   }, []);
 
   useEffect(() => {
@@ -183,6 +199,7 @@ function Admin() {
         onDelete={deleteAdminHandler}
         onModalOpen={openModalHandler}
         showForm={true}
+        onSearch={searchAdminHandler}
       />
     </Fragment>
   );

@@ -2,7 +2,11 @@ import React, { Fragment, useEffect, useState } from "react";
 import Main from "../Main";
 import Modal from "../Modal";
 import Form from "./Form";
-import { deleteCategory, getAllCategories } from "../../utils/api";
+import {
+  deleteCategory,
+  getAllCategories,
+  searchCategory,
+} from "../../utils/api";
 import {
   ACTIONS,
   CATEGORY_COLUMNS,
@@ -45,8 +49,8 @@ function Category() {
     setIsOpen(false);
     setAction(ACTIONS.DEFAULT);
   };
-  const fetchCategoryDataHandler = async () => {
-    const categoryData = await getAllCategories();
+
+  const structureRows = (categoryData) => {
     const data = categoryData.map((data) => ({
       id: data._id,
       name: data.name,
@@ -89,6 +93,12 @@ function Category() {
     }));
     return data;
   };
+
+  const fetchCategoryDataHandler = async () => {
+    const categoryData = await getAllCategories();
+    const data = structureRows(categoryData);
+    return data;
+  };
   const updateCategoryHandler = async (id) => {
     openModalHandler();
     setAction(ACTIONS.UPDATE);
@@ -124,6 +134,21 @@ function Category() {
       );
     }
   };
+  const searchCategoryHandler = async (searchName) => {
+    if (searchName !== "") {
+      const res = await searchCategory(searchName);
+      const data = structureRows(res);
+      setRowData(data);
+    } else {
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     // This will fetch Data when user comes to this route
     dispatch(
@@ -142,6 +167,7 @@ function Category() {
       );
     });
   }, []);
+
   useEffect(() => {
     // This will fetch Data when user perfoms any operations (Add,Update,Delete)
     if (operationState.status && operationState.activity == OPERATIONS.FETCH) {
@@ -182,6 +208,7 @@ function Category() {
         rowData={rowData}
         onUpdate={updateCategoryHandler}
         onDelete={deleteCategoryHandler}
+        onSearch={searchCategoryHandler}
       />
     </Fragment>
   );

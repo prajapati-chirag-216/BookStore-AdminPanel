@@ -48,7 +48,7 @@ const Input = forwardRef((props, ref) => {
         id="inputTag"
         name="image"
         type="file"
-        accept="image/*"
+        accept=".jpg, .jpeg, .png"
         multiple={props.multiple}
         onChange={props.onChange || null}
         onBlur={props.onBlur || null}
@@ -82,9 +82,9 @@ const Input = forwardRef((props, ref) => {
     <div className={classes["form-group"]}>
       {props.type == "password" &&
         (passIsVisible ? (
-          <VisibilityOffIcon onClick={changePassVisibility} />
-        ) : (
           <VisibilityIcon onClick={changePassVisibility} />
+        ) : (
+          <VisibilityOffIcon onClick={changePassVisibility} />
         ))}
       <input
         className={`${classes["input"]} ${

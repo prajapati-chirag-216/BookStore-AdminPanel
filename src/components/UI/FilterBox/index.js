@@ -15,7 +15,7 @@ function FilterBox() {
       <div className={classes["filter-box--value"]}>
         <li>price High to Low</li>
         <li>price Low to High</li>
-        <li>Letest</li>
+        <li>Latest</li>
         <li>Oldest</li>
       </div>
     </div>
