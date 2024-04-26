@@ -183,6 +183,12 @@ export const SNACKBAR_DETAILS = {
     severity: SNACKBAR_SEVERITY.WARNING,
     message: "Email already in use. Try another or log in.",
   },
+
+  ON_INVALID_SEARCH_ID: {
+    status: true,
+    severity: SNACKBAR_SEVERITY.WARNING,
+    message: "Invalid SearchID",
+  },
 };
 
 export const STEP_LABELS_ORDER_STATUS = ["Pending", "Shipped", "Reaching"];
@@ -386,3 +392,18 @@ export const USER_COLUMNS = [
     align: "right",
   },
 ];
+
+export const ICON_STYLE = {
+  fontSize: "2.2rem",
+  cursor: "pointer",
+  transition: "all .1s",
+  padding: ".7rem",
+  boxSizing: "content-box",
+  borderRadius: ".5rem",
+  "&:hover": {
+    backgroundColor: "#0001",
+  },
+  "&:active": {
+    scale: ".95",
+  },
+};

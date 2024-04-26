@@ -5,9 +5,11 @@ import Form from "./Form";
 import { deleteOrder, getAllOrders, searchOrder } from "../../utils/api";
 import {
   ACTIONS,
+  ICON_STYLE,
   OPERATIONS,
   ORDER_COLUMNS,
   SNACKBAR_DETAILS,
+  STATUS,
 } from "../../utils/variables";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/ui-slice";
@@ -15,91 +17,6 @@ import {
   BorderColor as BorderColorIcon,
   DeleteForever as DeleteForeverIcon,
 } from "@mui/icons-material";
-
-const iconStyle = {
-  fontSize: "2.2rem",
-  cursor: "pointer",
-  transition: "all .1s",
-  padding: ".7rem",
-  boxSizing: "content-box",
-  borderRadius: ".5rem",
-  "&:hover": {
-    backgroundColor: "#0001",
-  },
-  "&:active": {
-    scale: ".95",
-  },
-};
-
-const columns = [
-  {
-    id: "id",
-    label: "TransactionId",
-    minWidth: 80,
-    align: "left",
-  },
-  { id: "products", label: "products", minWidth: 80 },
-  {
-    id: "bill",
-    label: "Bill",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "deliveryStatus",
-    label: "deliveryStatus",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "customer",
-    label: "Customer",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "email",
-    label: "Email",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "phone",
-    label: "Phone",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "address",
-    label: "Address",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "createdAt",
-    label: "createdAt",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "updatedAt",
-    label: "updatedAt",
-    minWidth: 80,
-    align: "left",
-  },
-  {
-    id: "update",
-    label: "Update",
-    minWidth: 80,
-    align: "center",
-  },
-  {
-    id: "delete",
-    label: "Delete",
-    minWidth: 80,
-    align: "center",
-  },
-];
 
 function Order() {
   const [isOpen, setIsOpen] = useState(false);
@@ -140,7 +57,7 @@ function Order() {
       update: (
         <BorderColorIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "var(--primary-color-dark)",
           }}
           onClick={updateOrderHandler.bind(null, data._id)}
@@ -149,7 +66,7 @@ function Order() {
       delete: (
         <DeleteForeverIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "red",
           }}
           onClick={deleteOrderHandler.bind(null, data._id)}
@@ -190,11 +107,20 @@ function Order() {
       }
     }
   };
+
   const searchOrderHandler = async (searchId) => {
     if (searchId !== "") {
+      dispatch(uiActions.setIsLoadingBar({ status: STATUS.LOAD }));
       const res = await searchOrder(searchId);
-      const data = structureRows(res);
-      setRowData(data);
+      if (res?.isInValidId) {
+        dispatch(
+          uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_INVALID_SEARCH_ID })
+        );
+      } else {
+        const data = structureRows(res);
+        setRowData(data);
+      }
+      dispatch(uiActions.setIsLoadingBar({ status: STATUS.COMPLETE }));
     } else {
       dispatch(
         uiActions.setOperationState({
@@ -204,6 +130,7 @@ function Order() {
       );
     }
   };
+
   useEffect(() => {
     // This will fetch Data when user comes to this route
     dispatch(
@@ -222,6 +149,7 @@ function Order() {
       );
     });
   }, []);
+
   useEffect(() => {
     // This will fetch Data when user perfoms any operations (Add,Update,Delete)
     if (operationState.status && operationState.activity == OPERATIONS.FETCH) {
@@ -248,6 +176,7 @@ function Order() {
           />
         </Modal>
       )}
+
       <Main
         searchHolder="Search trasaction id.."
         title="orders"

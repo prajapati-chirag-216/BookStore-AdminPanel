@@ -3,6 +3,7 @@ import Main from "../Main";
 import { getAllUsers, deleteUser, searchUser } from "../../utils/api";
 import {
   ACTIONS,
+  ICON_STYLE,
   OPERATIONS,
   SNACKBAR_DETAILS,
   USER_COLUMNS,
@@ -10,21 +11,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/ui-slice";
 import { DeleteForever as DeleteForeverIcon } from "@mui/icons-material";
-
-const iconStyle = {
-  fontSize: "2.2rem",
-  cursor: "pointer",
-  transition: "all .1s",
-  padding: ".7rem",
-  boxSizing: "content-box",
-  borderRadius: ".5rem",
-  "&:hover": {
-    backgroundColor: "#0001",
-  },
-  "&:active": {
-    scale: ".95",
-  },
-};
 
 function Users() {
   const [rowData, setRowData] = useState([]);
@@ -50,7 +36,7 @@ function Users() {
       delete: (
         <DeleteForeverIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "red",
           }}
           onClick={deleteUserHandler.bind(null, data._id)}
@@ -132,7 +118,7 @@ function Users() {
   return (
     <Fragment>
       <Main
-        searchHolder="Search user id.."
+        searchHolder="Search email.."
         title="users"
         for="user"
         columns={USER_COLUMNS}

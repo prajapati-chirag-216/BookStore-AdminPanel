@@ -2,15 +2,11 @@ import React, { Fragment, useEffect, useState } from "react";
 import Main from "../Main";
 import Modal from "../Modal";
 import Form from "./Form";
-import {
-  deleteAdmin,
-  getAllAdmins,
-  getAllCategories,
-  searchAdmin,
-} from "../../utils/api";
+import { deleteAdmin, getAllAdmins, searchAdmin } from "../../utils/api";
 import {
   ACTIONS,
   ADMIN_COLUMNS,
+  ICON_STYLE,
   OPERATIONS,
   SNACKBAR_DETAILS,
 } from "../../utils/variables";
@@ -21,21 +17,6 @@ import {
   DeleteForever as DeleteForeverIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-
-const iconStyle = {
-  fontSize: "2.2rem",
-  cursor: "pointer",
-  transition: "all .1s",
-  padding: ".7rem",
-  boxSizing: "content-box",
-  borderRadius: ".5rem",
-  "&:hover": {
-    backgroundColor: "#0001",
-  },
-  "&:active": {
-    scale: ".95",
-  },
-};
 
 function Admin() {
   const [isOpen, setIsOpen] = useState(false);
@@ -72,7 +53,7 @@ function Admin() {
       update: (
         <BorderColorIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "var(--primary-color-dark)",
           }}
           onClick={updateAdminHandler.bind(null, data._id)}
@@ -81,7 +62,7 @@ function Admin() {
       delete: (
         <DeleteForeverIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "red",
           }}
           onClick={deleteAdminHandler.bind(null, data._id)}
@@ -190,7 +171,7 @@ function Admin() {
         </Modal>
       )}
       <Main
-        searchHolder="Search admin id.."
+        searchHolder="Search email.."
         title="admins"
         for="admin"
         columns={ADMIN_COLUMNS}

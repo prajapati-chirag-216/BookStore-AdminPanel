@@ -5,9 +5,13 @@ function SearchBox(props) {
 
   useEffect(() => {
     // this will stop calling unnecessary fetch calles of api
-    if (props?.onSearch) {
-      props.onSearch(searchStr);
-    }
+    const timer = setTimeout(() => {
+      if (props?.onSearch) {
+        props.onSearch(searchStr);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [searchStr]);
 
   const changeInputHandler = (event) => {

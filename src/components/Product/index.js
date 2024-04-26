@@ -5,6 +5,7 @@ import Form from "./Form";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ACTIONS,
+  ICON_STYLE,
   OPERATIONS,
   PRODUCT_COLUMNS,
   SNACKBAR_DETAILS,
@@ -17,21 +18,6 @@ import {
 } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
-
-const iconStyle = {
-  fontSize: "2.2rem",
-  cursor: "pointer",
-  transition: "all .1s",
-  padding: ".7rem",
-  boxSizing: "content-box",
-  borderRadius: ".5rem",
-  "&:hover": {
-    backgroundColor: "#0001",
-  },
-  "&:active": {
-    scale: ".95",
-  },
-};
 
 function Product() {
   const [isOpen, setIsOpen] = useState(false);
@@ -94,7 +80,7 @@ function Product() {
         <BorderColorIcon
           color="success"
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "var(--primary-color-dark)",
           }}
           onClick={updateProductHandler.bind(null, data._id)}
@@ -103,7 +89,7 @@ function Product() {
       delete: (
         <DeleteForeverIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "red",
           }}
           onClick={deleteProductHandler.bind(null, data._id)}
@@ -202,7 +188,7 @@ function Product() {
         </Modal>
       )}
       <Main
-        searchHolder="Search by id.."
+        searchHolder="Search book name.."
         title="products"
         onModalOpen={openModalHandler}
         showForm={true}

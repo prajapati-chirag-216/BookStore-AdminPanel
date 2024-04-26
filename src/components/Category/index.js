@@ -10,6 +10,7 @@ import {
 import {
   ACTIONS,
   CATEGORY_COLUMNS,
+  ICON_STYLE,
   OPERATIONS,
   SNACKBAR_DETAILS,
 } from "../../utils/variables";
@@ -19,21 +20,6 @@ import {
   BorderColor as BorderColorIcon,
   DeleteForever as DeleteForeverIcon,
 } from "@mui/icons-material";
-
-const iconStyle = {
-  fontSize: "2.2rem",
-  cursor: "pointer",
-  transition: "all .1s",
-  padding: ".7rem",
-  boxSizing: "content-box",
-  borderRadius: ".5rem",
-  "&:hover": {
-    backgroundColor: "#0001",
-  },
-  "&:active": {
-    scale: ".95",
-  },
-};
 
 function Category() {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +61,7 @@ function Category() {
       update: (
         <BorderColorIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "var(--primary-color-dark)",
           }}
           onClick={updateCategoryHandler.bind(null, data._id)}
@@ -84,7 +70,7 @@ function Category() {
       delete: (
         <DeleteForeverIcon
           sx={{
-            ...iconStyle,
+            ...ICON_STYLE,
             color: "red",
           }}
           onClick={deleteCategoryHandler.bind(null, data._id)}
@@ -199,7 +185,7 @@ function Category() {
         </Modal>
       )}
       <Main
-        searchHolder="Search by name.."
+        searchHolder="Search name.."
         title="categories"
         onModalOpen={openModalHandler}
         showForm={true}
