@@ -28,18 +28,22 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 }));
 
 const BasicSelect = forwardRef((props, ref) => {
-  const [selectedOption, setSelectedOption] = useState(0); // Initial selected value
+  const [selectedOption, setSelectedOption] = useState(props?.value || 0); // Initial selected value
 
   const inputRef = useRef();
 
   const activate = () => {
     inputRef.current.focus();
   };
+  const changeSelectedOption = (value) => {
+    setSelectedOption(value);
+  };
   useImperativeHandle(ref, () => {
     return {
       focus: activate,
       value: props.options[selectedOption].name,
       id: props.options[selectedOption].id,
+      setValue: changeSelectedOption,
     };
   });
 
@@ -56,7 +60,7 @@ const BasicSelect = forwardRef((props, ref) => {
           textTransform: "capitalize",
         }}
         onChange={(event) => {
-          setSelectedOption(event.target.value); // Update selected value on change
+          changeSelectedOption(event.target.value); // Update selected value on change
         }}
         id="select-input"
         name={props.name}

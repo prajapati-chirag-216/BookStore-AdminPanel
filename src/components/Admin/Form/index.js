@@ -12,7 +12,7 @@ import {
   SNACKBAR_DETAILS,
 } from "../../../utils/variables";
 import { uiActions } from "../../../store/ui-slice";
-import { addAdmin, updateAdmin } from "../../../utils/api";
+import { addAdmin, getAdmin, getAdmins, updateAdmin } from "../../../utils/api";
 import { useDispatch } from "react-redux";
 
 function Form(props) {
@@ -56,6 +56,22 @@ function Form(props) {
     });
   };
 
+  const fillFormHandler = async () => {
+    const data = await getAdmin(props.selectedId);
+    dispatchName({
+      type: "USER_INPUT",
+      value: data.name,
+    });
+    dispatchEmail({
+      type: "USER_INPUT",
+      value: data.email,
+    });
+    // this will find category with same name and assign it's index to select value
+    if (data.role.toLowerCase() == ROLES.ADMIN.toLowerCase()) {
+      roleRef.current.setValue(1);
+    }
+  };
+
   // this will run on input gets out from focus
   const validateNameHandler = () => dispatchName({ type: "INPUT_BLUR" });
   const validateEmailHandler = () => dispatchEmail({ type: "INPUT_BLUR" });
@@ -74,6 +90,15 @@ function Form(props) {
       clearTimeout(timer);
     };
   }, [nameIsValid, emailIsValid, passwordIsValid]);
+
+  // this useEffect is for form filling when user click on update button
+  useEffect(() => {
+    if (props.action == ACTIONS.UPDATE) {
+      (async () => {
+        await fillFormHandler();
+      })();
+    }
+  }, [props.action, props.selectedId]);
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
@@ -109,22 +134,22 @@ function Form(props) {
               : { ...SNACKBAR_DETAILS.ON_ADD_EMPLOYEE }
           )
         );
-        dispatch(
-          uiActions.setOperationState({
-            status: true,
-            activity: OPERATIONS.FETCH,
-          })
-        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
       }
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
     } else if (props.action == ACTIONS.UPDATE) {
       const filteredAdminData = Object.fromEntries(
         Object.entries(adminData).filter(([_, value]) => value !== "" && value)
       );
-      if (filteredAdminData.length > 0) {
+      if (Object.keys(filteredAdminData).length > 0) {
         dispatch(
           uiActions.setOperationState({
             status: true,
@@ -140,17 +165,17 @@ function Form(props) {
                 : { ...SNACKBAR_DETAILS.ON_UPDATE_EMPLOYEE }
             )
           );
-          dispatch(
-            uiActions.setOperationState({
-              status: true,
-              activity: OPERATIONS.FETCH,
-            })
-          );
         } catch (err) {
           if (err?.response?.status == 500) {
             dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
           }
         }
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } else {
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_DEFAULT }));
       }
@@ -160,11 +185,7 @@ function Form(props) {
   return (
     <form
       className={classes["form"]}
-      onSubmit={
-        formIsValid || props.action == ACTIONS.UPDATE
-          ? submitFormHandler
-          : validateFormHandler
-      }
+      onSubmit={formIsValid ? submitFormHandler : validateFormHandler}
       method="post"
     >
       <Input
@@ -175,11 +196,7 @@ function Form(props) {
         placeholder="Name"
         name="name"
         value={nameState.value}
-        isValid={
-          props.action == ACTIONS.DEFAULT
-            ? nameIsValid
-            : nameIsValid || nameState.value == ""
-        }
+        isValid={nameIsValid}
       />
 
       <Input
@@ -190,12 +207,9 @@ function Form(props) {
         placeholder="Email"
         name="email"
         value={emailState.value}
-        isValid={
-          props.action == ACTIONS.DEFAULT
-            ? emailIsValid
-            : emailIsValid || emailState.value == ""
-        }
+        isValid={emailIsValid}
       />
+      {/*  we need to check for password as well */}
       <div className={classes["row-inp"]}>
         <Input
           ref={passwordRef}

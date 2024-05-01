@@ -101,6 +101,15 @@ export const getAllProducts = async () => {
   return response;
 };
 
+export const getProduct = async (id) => {
+  const config = {
+    url: `/getproduct/${id}`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
+
 export const searchProduct = async (name) => {
   const config = {
     url: `/searchProduct/${name}`,
@@ -197,6 +206,15 @@ export const updateCategory = async (id, categoryData) => {
   } catch (err) {
     throw err;
   }
+};
+
+export const getCategory = async (id) => {
+  const config = {
+    url: `/fetchCategory/${id}`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
 };
 
 export const getAllCategories = async () => {
@@ -322,6 +340,14 @@ export const getAccessToken = async () => {
 export const getAdmins = async () => {
   const config = {
     url: `/getAllAdmins`,
+    withCredentials: true,
+  };
+  const response = await AxiosInstance(config);
+  return response;
+};
+export const getAdmin = async (id) => {
+  const config = {
+    url: `/getAdmin/${id}`,
     withCredentials: true,
   };
   const response = await AxiosInstance(config);

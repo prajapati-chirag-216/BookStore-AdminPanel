@@ -5,19 +5,14 @@ import Form from "./Form";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ACTIONS,
-  ICON_STYLE,
   OPERATIONS,
   PRODUCT_COLUMNS,
   SNACKBAR_DETAILS,
 } from "../../utils/variables";
 import { uiActions } from "../../store/ui-slice";
 import { deleteProduct, getAllProducts, searchProduct } from "../../utils/api";
-import {
-  BorderColor as BorderColorIcon,
-  DeleteForever as DeleteForeverIcon,
-} from "@mui/icons-material";
-import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
+
+import { createProductRows } from "../../utils/function";
 
 function Product() {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,73 +29,14 @@ function Product() {
     setAction(ACTIONS.DEFAULT);
   };
 
-  const structureRows = (productData) => {
-    const data = productData.map((data) => ({
-      id: data._id,
-      category: data.category.name,
-      bookName: data.bookName,
-      price: data.price,
-      quantity: data.quantity,
-      authorName: data.authorName,
-      description: data.description.slice(0, 30) + "..",
-      images: (
-        <Fragment>
-          {data.images.map((image, index) => (
-            <img
-              key={index}
-              width="40px"
-              height="40px"
-              style={{
-                objectFit: "cover",
-                borderRadius: "3px",
-                marginRight: index !== data.images.length - 1 ? ".5rem" : "0",
-              }}
-              src={image}
-            />
-          ))}
-        </Fragment>
-      ),
-      status:
-        data.status.toLowerCase() == "available" ? (
-          <CheckIcon color="success" sx={{ fontSize: "2.5rem" }} />
-        ) : (
-          <CloseIcon color="error" sx={{ fontSize: "2.5rem" }} />
-        ),
-      createdAt: `${new Date(data.createdAt).toLocaleDateString()}
-      ,
-      ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
-        ,
-        ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      update: (
-        <BorderColorIcon
-          color="success"
-          sx={{
-            ...ICON_STYLE,
-            color: "var(--primary-color-dark)",
-          }}
-          onClick={updateProductHandler.bind(null, data._id)}
-        />
-      ),
-      delete: (
-        <DeleteForeverIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "red",
-          }}
-          onClick={deleteProductHandler.bind(null, data._id)}
-        />
-      ),
-    }));
-    return data;
-  };
   const fetchProductDataHandler = async () => {
     const productData = await getAllProducts();
-    const data = structureRows(productData);
+    // this function accepts data, onUpdate and onDelete function
+    const data = createProductRows(
+      productData,
+      updateProductHandler,
+      deleteProductHandler
+    );
     return data;
   };
   const updateProductHandler = async (id) => {
@@ -116,26 +52,30 @@ function Product() {
       })
     );
     try {
-      const data = await deleteProduct(id);
-
+      await deleteProduct(id);
       dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_DELETE_ITEM));
     } catch (err) {
       if (err?.response?.status == 500) {
         dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
       }
-      dispatch(
-        uiActions.setOperationState({
-          status: false,
-          activity: OPERATIONS.FETCH,
-        })
-      );
     }
+    dispatch(
+      uiActions.setOperationState({
+        status: false,
+        activity: OPERATIONS.FETCH,
+      })
+    );
   };
 
   const searchProductHandler = async (searchName) => {
     if (searchName !== "") {
       const res = await searchProduct(searchName);
-      const data = structureRows(res);
+      // this function accepts data, onUpdate and onDelete function
+      const data = createProductRows(
+        res,
+        updateProductHandler,
+        deleteProductHandler
+      );
       setRowData(data);
     } else {
       dispatch(

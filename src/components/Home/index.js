@@ -5,7 +5,6 @@ import Form from "./Form";
 import { deleteOrder, getAllOrders, searchOrder } from "../../utils/api";
 import {
   ACTIONS,
-  ICON_STYLE,
   OPERATIONS,
   ORDER_COLUMNS,
   SNACKBAR_DETAILS,
@@ -13,10 +12,8 @@ import {
 } from "../../utils/variables";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/ui-slice";
-import {
-  BorderColor as BorderColorIcon,
-  DeleteForever as DeleteForeverIcon,
-} from "@mui/icons-material";
+
+import { createOrderRows } from "../../utils/function";
 
 function Order() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,52 +29,15 @@ function Order() {
     setIsOpen(false);
     setAction(ACTIONS.DEFAULT);
   };
-  const structureRows = (orderData) => {
-    const data = orderData.map((data) => ({
-      id: data._id,
-      products: data.orderedItems
-        .map((item) => item.productId.bookName + " x " + item.quantity)
-        .join(" , "),
-      bill: data.totalPrice,
-      deliveryStatus: data.deliveryStatus,
-      customer: data.shippingAddress.userName,
-      email: data.contactInformation.email,
-      phone: data.contactInformation.phoneNo,
-      address: data.shippingAddress.address,
-      createdAt: `${new Date(data.createdAt).toLocaleDateString()}
-      ,
-      ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
-        ,
-        ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      update: (
-        <BorderColorIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "var(--primary-color-dark)",
-          }}
-          onClick={updateOrderHandler.bind(null, data._id)}
-        />
-      ),
-      delete: (
-        <DeleteForeverIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "red",
-          }}
-          onClick={deleteOrderHandler.bind(null, data._id)}
-        />
-      ),
-    }));
-    return data;
-  };
+
   const fetchOrderDataHandler = async () => {
     const orderData = await getAllOrders();
-    const data = structureRows(orderData);
+    // this function accepts data, onUpdate and onDelete function
+    const data = createOrderRows(
+      orderData,
+      updateOrderHandler,
+      deleteOrderHandler
+    );
     return data;
   };
   const updateOrderHandler = async (id) => {
@@ -117,7 +77,12 @@ function Order() {
           uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_INVALID_SEARCH_ID })
         );
       } else {
-        const data = structureRows(res);
+        // this function accepts data, onUpdate and onDelete function
+        const data = createOrderRows(
+          res,
+          updateOrderHandler,
+          deleteOrderHandler
+        );
         setRowData(data);
       }
       dispatch(uiActions.setIsLoadingBar({ status: STATUS.COMPLETE }));

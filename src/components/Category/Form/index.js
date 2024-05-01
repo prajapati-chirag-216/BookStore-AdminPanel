@@ -3,7 +3,7 @@ import classes from "./index.module.css";
 import Input from "../../Input";
 import Button from "../../Button";
 import { nameReducer } from "../../../reducers";
-import { addCategory, updateCategory } from "../../../utils/api";
+import { addCategory, getCategory, updateCategory } from "../../../utils/api";
 import {
   ACTIONS,
   OPERATIONS,
@@ -41,13 +41,7 @@ function Form(props) {
   const imageChangeHandler = (event) => {
     let name = "";
     const files = event.target.files;
-    // if (files[0]) {
-    //   Object.keys(files).forEach((key, index) => {
-    //     if (index < files.length) {
-    //       name += files[key].name + ", ";
-    //     }
-    //   });
-    // }
+
     let isValid = true;
     if (files.length > 0) {
       for (let i = 0; i < files.length; i++) {
@@ -75,20 +69,42 @@ function Form(props) {
     setImageName(name);
   };
 
+  const fillFormHandler = async () => {
+    const data = await getCategory(props.selectedId);
+    dispatchCategoryName({
+      type: "USER_INPUT",
+      value: data.name,
+    });
+  };
+
   // this will run on input gets out from focus
   const validateCategoryNameHandler = () =>
     dispatchCategoryName({ type: "INPUT_BLUR" });
 
   const { isValid: categoryNameIsValid } = categoryNameState;
   const imageIsValid = imageName !== "" && imageName !== null;
+
+  // this useEffect is for form validation
   useEffect(() => {
     const timer = setTimeout(() => {
-      setFormIsValid(categoryNameIsValid && imageIsValid);
+      // this will check for image validity only if add action is performed
+      setFormIsValid(
+        categoryNameIsValid && (props.action == ACTIONS.UPDATE || imageIsValid)
+      );
     }, 500);
     return () => {
       clearTimeout(timer);
     };
   }, [categoryNameIsValid, imageIsValid]);
+
+  // this useEffect is for form filling when user click on update button
+  useEffect(() => {
+    if (props.action == ACTIONS.UPDATE) {
+      (async () => {
+        await fillFormHandler();
+      })();
+    }
+  }, [props.action, props.selectedId]);
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
@@ -116,17 +132,17 @@ function Form(props) {
         dispatch(
           uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_ADD_CATEGORY })
         );
-        dispatch(
-          uiActions.setOperationState({
-            status: true,
-            activity: OPERATIONS.FETCH,
-          })
-        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
       }
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
     } else if (props.action == ACTIONS.UPDATE) {
       const filteredCategoryData = Object.fromEntries(
         Object.entries(categoryData).filter(
@@ -145,17 +161,17 @@ function Form(props) {
           dispatch(
             uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UPDATE_CATEGORY })
           );
-          dispatch(
-            uiActions.setOperationState({
-              status: true,
-              activity: OPERATIONS.FETCH,
-            })
-          );
         } catch (err) {
           if (err?.response?.status == 500) {
             dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
           }
         }
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } else {
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_DEFAULT }));
       }
@@ -164,11 +180,7 @@ function Form(props) {
   return (
     <form
       className={classes["form"]}
-      onSubmit={
-        formIsValid || props.action == ACTIONS.UPDATE
-          ? submitFormHandler
-          : validateFormHandler
-      }
+      onSubmit={formIsValid ? submitFormHandler : validateFormHandler}
       method="post"
       id="myForm"
     >
@@ -182,7 +194,7 @@ function Form(props) {
         name="categoryName"
         value={categoryNameState.value}
       />
-
+      {/* we need to check for image as well */}
       <Input
         ref={imageRef}
         type="file"

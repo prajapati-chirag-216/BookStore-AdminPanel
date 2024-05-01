@@ -24,7 +24,7 @@ import { loader as categoryLoader } from "./components/Product/Form";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Wrapper />} errorElement={<Error />}>
-      <Route index element={<Navigate to="/auth" />} />
+      <Route index element={<Navigate to="/home" />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/home" />} />

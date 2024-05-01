@@ -45,6 +45,17 @@ axios.interceptors.response.use(
         })
       );
     }
+    // this will check for duplicate values of any collection
+    // eg. use create account with same email 2nd time will caught here
+    else if (error.response?.status === 409) {
+      store.dispatch(
+        uiActions.setSnackBar({
+          status: true,
+          message: error.response?.data?.message || "Somthing Went Wrong",
+          severity: SNACKBAR_SEVERITY.WARNING,
+        })
+      );
+    }
     return Promise.reject(error);
   }
 );

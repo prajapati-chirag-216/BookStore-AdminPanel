@@ -77,15 +77,14 @@ function Form() {
       await loginAdmin(userData);
       navigate("/home");
       dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_LOGGED_IN }));
-      dispatch(uiActions.setIsLoadingBar({ status: STATUS.COMPLETE }));
     } catch (err) {
-      dispatch(uiActions.setIsLoadingBar({ status: STATUS.COMPLETE }));
       if (err.response?.data?.message.toLowerCase().includes("password")) {
         passwordRef.current.focus();
       } else {
         emailRef.current.focus();
       }
     }
+    dispatch(uiActions.setIsLoadingBar({ status: STATUS.COMPLETE }));
   };
 
   return (

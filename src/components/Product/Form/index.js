@@ -17,6 +17,7 @@ import {
 import {
   addProduct,
   getAllCategories,
+  getProduct,
   updateProduct,
 } from "../../../utils/api";
 import { Await, useLoaderData } from "react-router-dom";
@@ -117,6 +118,41 @@ function Form(props) {
     });
   };
 
+  const fillFormHandler = async () => {
+    const data = await getProduct(props.selectedId);
+    dispatchBookName({
+      type: "USER_INPUT",
+      value: data.bookName,
+    });
+    dispatchAuthorName({
+      type: "USER_INPUT",
+      value: data.authorName,
+    });
+    dispatchDescription({
+      type: "USER_INPUT",
+      value: data.description,
+    });
+    dispatchPrice({
+      type: "USER_INPUT",
+      value: data.price.toString(),
+    });
+    dispatchQuantity({
+      type: "USER_INPUT",
+      value: data.quantity.toString(),
+    });
+
+    if (data.status.toLowerCase() == "not-available") {
+      statusRef.current.setValue(1);
+    }
+
+    // this will find category with same name and assign it's index to select value
+    loaderData.map((category, index) => {
+      if (category.name.toLowerCase() == data.category.name.toLowerCase()) {
+        categoryRef.current.setValue(index);
+      }
+    });
+  };
+
   // this will run on input gets out from focus
   const validateBookNameHandler = () =>
     dispatchBookName({ type: "INPUT_BLUR" });
@@ -135,6 +171,7 @@ function Form(props) {
   const { isValid: quantityIsValid } = quantityState;
   const imageIsValid = imageName !== "" && imageName !== null;
   useEffect(() => {
+    // this will check for image validity only if add action is performed
     const timer = setTimeout(() => {
       setFormIsValid(
         bookNameIsValid &&
@@ -142,7 +179,7 @@ function Form(props) {
           descriptionIsValid &&
           priceIsValid &&
           quantityIsValid &&
-          imageIsValid
+          (props.action == ACTIONS.UPDATE || imageIsValid)
       );
     }, 500);
     return () => {
@@ -156,6 +193,15 @@ function Form(props) {
     quantityIsValid,
     imageIsValid,
   ]);
+
+  // this useEffect is for form filling when user click on update button
+  useEffect(() => {
+    if (props.action == ACTIONS.UPDATE) {
+      (async () => {
+        await fillFormHandler();
+      })();
+    }
+  }, [props.action, props.selectedId]);
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
@@ -197,17 +243,19 @@ function Form(props) {
       );
       try {
         await addProduct(productData);
+
+        dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_ADD_ITEM }));
+      } catch (err) {
+        if (err?.response?.status == 500) {
+          dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
+        }
+      } finally {
         dispatch(
           uiActions.setOperationState({
             status: true,
             activity: OPERATIONS.FETCH,
           })
         );
-        dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_ADD_ITEM }));
-      } catch (err) {
-        if (err?.response?.status == 500) {
-          dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
-        }
       }
     } else if (props.action == ACTIONS.UPDATE) {
       const filteredProductData = Object.fromEntries(
@@ -226,27 +274,24 @@ function Form(props) {
       try {
         await updateProduct(props.selectedId, filteredProductData);
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UPDATE_ITEM }));
+      } catch (err) {
+        if (err?.response?.status == 500) {
+          dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
+        }
+      } finally {
         dispatch(
           uiActions.setOperationState({
             status: true,
             activity: OPERATIONS.FETCH,
           })
         );
-      } catch (err) {
-        if (err?.response?.status == 500) {
-          dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
-        }
       }
     }
   };
   return (
     <form
       className={classes["form"]}
-      onSubmit={
-        formIsValid || props.action == ACTIONS.UPDATE
-          ? submitFormHandler
-          : validateFormHandler
-      }
+      onSubmit={formIsValid ? submitFormHandler : validateFormHandler}
       method="post"
     >
       <div className={classes["row-inp"]}>
@@ -258,11 +303,7 @@ function Form(props) {
           onBlur={validateBookNameHandler}
           name="bookName"
           value={bookNameState.value}
-          isValid={
-            props.action == ACTIONS.DEFAULT
-              ? bookNameIsValid
-              : bookNameIsValid || bookNameState.value == ""
-          }
+          isValid={bookNameIsValid}
         />
         <Input
           ref={authorNameRef}
@@ -272,11 +313,7 @@ function Form(props) {
           onBlur={validateAuthorNameHandler}
           name="authorName"
           value={authorNameState.value}
-          isValid={
-            props.action == ACTIONS.DEFAULT
-              ? authorNameIsValid
-              : authorNameIsValid || authorNameState.value == ""
-          }
+          isValid={authorNameIsValid}
         />
       </div>
       <div className={classes["row-inp"]}>
@@ -288,11 +325,7 @@ function Form(props) {
           placeholder="Price"
           name="price"
           value={priceState.value}
-          isValid={
-            props.action == ACTIONS.DEFAULT
-              ? priceIsValid
-              : priceIsValid || priceState.value == ""
-          }
+          isValid={priceIsValid}
         />
         <Input
           ref={quantityRef}
@@ -302,11 +335,7 @@ function Form(props) {
           placeholder="Quantity"
           name="quantity"
           value={quantityState.value}
-          isValid={
-            props.action == ACTIONS.DEFAULT
-              ? quantityIsValid
-              : quantityIsValid || quantityState.value == ""
-          }
+          isValid={quantityIsValid}
         />
       </div>
       <Input
@@ -317,11 +346,7 @@ function Form(props) {
         onBlur={validateDescriptionHandler}
         name="description"
         value={descriptionState.value}
-        isValid={
-          props.action == ACTIONS.DEFAULT
-            ? descriptionIsValid
-            : descriptionIsValid || descriptionState.value == ""
-        }
+        isValid={descriptionIsValid}
       />
 
       <Input

@@ -6,17 +6,14 @@ import { deleteAdmin, getAllAdmins, searchAdmin } from "../../utils/api";
 import {
   ACTIONS,
   ADMIN_COLUMNS,
-  ICON_STYLE,
   OPERATIONS,
   SNACKBAR_DETAILS,
 } from "../../utils/variables";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/ui-slice";
-import {
-  BorderColor as BorderColorIcon,
-  DeleteForever as DeleteForeverIcon,
-} from "@mui/icons-material";
+
 import { useNavigate } from "react-router-dom";
+import { createAdminRows } from "../../utils/function";
 
 function Admin() {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,48 +31,15 @@ function Admin() {
     setAction(ACTIONS.DEFAULT);
   };
 
-  const structureRows = (adminData) => {
-    const data = adminData.map((data) => ({
-      id: data._id,
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      createdAt: `${new Date(data.createdAt).toLocaleDateString()}
-      ,
-      ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
-        ,
-        ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      update: (
-        <BorderColorIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "var(--primary-color-dark)",
-          }}
-          onClick={updateAdminHandler.bind(null, data._id)}
-        />
-      ),
-      delete: (
-        <DeleteForeverIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "red",
-          }}
-          onClick={deleteAdminHandler.bind(null, data._id)}
-        />
-      ),
-    }));
-    return data;
-  };
-
   const fetchAdminDataHandler = async () => {
     try {
       const adminData = await getAllAdmins();
-      const data = structureRows(adminData);
+      // this function accepts data, onUpdate and onDelete function
+      const data = createAdminRows(
+        adminData,
+        updateAdminHandler,
+        deleteAdminHandler
+      );
       return data;
     } catch (err) {
       return navigate("/auth", { replace: true });
@@ -118,7 +82,8 @@ function Admin() {
   const searchAdminHandler = async (searchName) => {
     if (searchName !== "") {
       const res = await searchAdmin(searchName);
-      const data = structureRows(res);
+      // this function accepts data, onUpdate and onDelete function
+      const data = createAdminRows(res, updateAdminHandler, deleteAdminHandler);
       setRowData(data);
     } else {
       dispatch(

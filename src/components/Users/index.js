@@ -2,15 +2,13 @@ import React, { useState, useEffect, Fragment } from "react";
 import Main from "../Main";
 import { getAllUsers, deleteUser, searchUser } from "../../utils/api";
 import {
-  ACTIONS,
-  ICON_STYLE,
   OPERATIONS,
   SNACKBAR_DETAILS,
   USER_COLUMNS,
 } from "../../utils/variables";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/ui-slice";
-import { DeleteForever as DeleteForeverIcon } from "@mui/icons-material";
+import { createUserRows } from "../../utils/function";
 
 function Users() {
   const [rowData, setRowData] = useState([]);
@@ -18,36 +16,10 @@ function Users() {
 
   const dispatch = useDispatch();
 
-  const structureRows = (userData) => {
-    const data = userData.map((data) => ({
-      id: data._id,
-      name: data.name,
-      email: data.email,
-      createdAt: `${new Date(data.createdAt).toLocaleDateString()}
-      ,
-      ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
-        ,
-        ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      delete: (
-        <DeleteForeverIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "red",
-          }}
-          onClick={deleteUserHandler.bind(null, data._id)}
-        />
-      ),
-    }));
-    return data;
-  };
   const fetchUserDataHandler = async () => {
     const userData = await getAllUsers();
-    const data = structureRows(userData);
+    // this function accepts data and onDelete function
+    const data = createUserRows(userData, deleteUserHandler);
     return data;
   };
 
@@ -77,7 +49,8 @@ function Users() {
   const searchUserHandler = async (searchEmail) => {
     if (searchEmail != "") {
       const res = await searchUser(searchEmail);
-      const data = structureRows(res);
+      // this function accepts data and onDelete function
+      const data = createUserRows(res, deleteUserHandler);
       setRowData(data);
     } else {
       dispatch(
@@ -102,7 +75,6 @@ function Users() {
   useEffect(() => {
     // This will fetch Data when user perfoms any operations (Add,Update,Delete)
     if (operationState.status && operationState.activity == OPERATIONS.FETCH) {
-      console.log("Came");
       fetchUserDataHandler().then((data) => {
         setRowData(data);
         dispatch(

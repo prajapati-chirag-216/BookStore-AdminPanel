@@ -14,7 +14,7 @@ export const nameReducer = (state, action) => {
       isValid:
         newVal.trim().length == 0
           ? null
-          : newVal.trim().length > 5 &&
+          : newVal.trim().length >= 5 &&
             newVal.trim().length <= 30 &&
             !startsWithNumber,
     };
@@ -23,7 +23,7 @@ export const nameReducer = (state, action) => {
     return {
       value: newVal,
       isValid:
-        newVal.trim().length > 5 &&
+        newVal.trim().length >= 5 &&
         newVal.trim().length <= 30 &&
         !startsWithNumber,
     };
@@ -31,7 +31,8 @@ export const nameReducer = (state, action) => {
   if (action.type === "INPUT_BLUR") {
     return {
       value: state.value.trim(),
-      isValid: state.value.trim().length > 5 && state.value.trim().length <= 30,
+      isValid:
+        state.value.trim().length >= 5 && state.value.trim().length <= 30,
     };
   }
   return { value: "", isValid: null };

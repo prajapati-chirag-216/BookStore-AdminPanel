@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import classes from "./index.module.css";
 import Select from "../../Select";
 import Button from "../../Button";
-import { updateOrder } from "../../../utils/api";
+import { getOrderById, updateOrder } from "../../../utils/api";
 import { useDispatch } from "react-redux";
 import { uiActions } from "../../../store/ui-slice";
 import {
@@ -10,12 +10,32 @@ import {
   OPERATIONS,
   SNACKBAR_DETAILS,
   ORDER_STATUS_LIST,
+  STATUS,
 } from "../../../utils/variables";
 
 function Form(props) {
   const dispatch = useDispatch();
 
   const statusRef = useRef(null);
+
+  const fillFormHandler = async () => {
+    const data = await getOrderById(props.selectedId);
+    console.log(data);
+    // this will find category with same name and assign it's index to select value
+    ORDER_STATUS_LIST.map((status, index) => {
+      if (status.name.toLowerCase() == data.deliveryStatus.toLowerCase()) {
+        statusRef.current.setValue(index);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (props.action == ACTIONS.UPDATE) {
+      (async () => {
+        await fillFormHandler();
+      })();
+    }
+  }, [props.action, props.selectedId]);
 
   const submitFormHandler = async (event) => {
     event.preventDefault();
@@ -35,16 +55,17 @@ function Form(props) {
         dispatch(
           uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UPDATE_ORDER })
         );
+      } catch (err) {
+        if (err?.response?.status == 500) {
+          dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
+        }
+      } finally {
         dispatch(
           uiActions.setOperationState({
             status: true,
             activity: OPERATIONS.FETCH,
           })
         );
-      } catch (err) {
-        if (err?.response?.status == 500) {
-          dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
-        }
       }
     }
   };

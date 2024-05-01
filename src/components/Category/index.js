@@ -10,16 +10,13 @@ import {
 import {
   ACTIONS,
   CATEGORY_COLUMNS,
-  ICON_STYLE,
   OPERATIONS,
   SNACKBAR_DETAILS,
 } from "../../utils/variables";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../../store/ui-slice";
-import {
-  BorderColor as BorderColorIcon,
-  DeleteForever as DeleteForeverIcon,
-} from "@mui/icons-material";
+
+import { createCategoryRows } from "../../utils/function";
 
 function Category() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,53 +33,14 @@ function Category() {
     setAction(ACTIONS.DEFAULT);
   };
 
-  const structureRows = (categoryData) => {
-    const data = categoryData.map((data) => ({
-      id: data._id,
-      name: data.name,
-      image: (
-        <img
-          width="40px"
-          height="40px"
-          style={{ objectFit: "cover", borderRadius: "3px" }}
-          src={data.image}
-        />
-      ),
-      createdAt: `${new Date(data.createdAt).toLocaleDateString()}
-      ,
-      ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      updatedAt: `${new Date(data.createdAt).toLocaleDateString()}
-        ,
-        ${new Date(data.updatedAt).getHours()}:${new Date(
-        data.updatedAt
-      ).getMinutes()}`,
-      update: (
-        <BorderColorIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "var(--primary-color-dark)",
-          }}
-          onClick={updateCategoryHandler.bind(null, data._id)}
-        />
-      ),
-      delete: (
-        <DeleteForeverIcon
-          sx={{
-            ...ICON_STYLE,
-            color: "red",
-          }}
-          onClick={deleteCategoryHandler.bind(null, data._id)}
-        />
-      ),
-    }));
-    return data;
-  };
-
   const fetchCategoryDataHandler = async () => {
     const categoryData = await getAllCategories();
-    const data = structureRows(categoryData);
+    // this function accepts data, onUpdate and onDelete function
+    const data = createCategoryRows(
+      categoryData,
+      updateCategoryHandler,
+      deleteCategoryHandler
+    );
     return data;
   };
   const updateCategoryHandler = async (id) => {
@@ -123,7 +81,12 @@ function Category() {
   const searchCategoryHandler = async (searchName) => {
     if (searchName !== "") {
       const res = await searchCategory(searchName);
-      const data = structureRows(res);
+      // this function accepts data, onUpdate and onDelete function
+      const data = createCategoryRows(
+        res,
+        updateCategoryHandler,
+        deleteCategoryHandler
+      );
       setRowData(data);
     } else {
       dispatch(
