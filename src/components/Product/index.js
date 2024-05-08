@@ -29,16 +29,6 @@ function Product() {
     setAction(ACTIONS.DEFAULT);
   };
 
-  const fetchProductDataHandler = async () => {
-    const productData = await getAllProducts();
-    // this function accepts data, onUpdate and onDelete function
-    const data = createProductRows(
-      productData,
-      updateProductHandler,
-      deleteProductHandler
-    );
-    return data;
-  };
   const updateProductHandler = async (id) => {
     openModalHandler();
     setAction(ACTIONS.UPDATE);
@@ -54,17 +44,33 @@ function Product() {
     try {
       await deleteProduct(id);
       dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_DELETE_ITEM));
+      dispatch(
+        uiActions.setOperationState({
+          status: true,
+          activity: OPERATIONS.FETCH,
+        })
+      );
     } catch (err) {
       if (err?.response?.status == 500) {
         dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
       }
+      dispatch(
+        uiActions.setOperationState({
+          status: false,
+          activity: OPERATIONS.FETCH,
+        })
+      );
     }
-    dispatch(
-      uiActions.setOperationState({
-        status: false,
-        activity: OPERATIONS.FETCH,
-      })
+  };
+  const fetchProductDataHandler = async () => {
+    const productData = await getAllProducts();
+    // this function accepts data, onUpdate and onDelete function
+    const data = createProductRows(
+      productData,
+      updateProductHandler,
+      deleteProductHandler
     );
+    return data;
   };
 
   const searchProductHandler = async (searchName) => {

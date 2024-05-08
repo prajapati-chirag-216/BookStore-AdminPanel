@@ -17,9 +17,21 @@ const Input = forwardRef((props, ref) => {
   const activate = () => {
     inputRef.current.focus();
   };
+  const deActivate = () => {
+    inputRef.current.blur();
+  };
+
+  // here we are using this logic so that inputs isValid became false instead of null adn show message
+  const showError = () => {
+    activate();
+    deActivate();
+    activate();
+  };
   useImperativeHandle(ref, () => {
     return {
       focus: activate,
+      blur: deActivate,
+      onInvalid: showError,
       files: inputRef.current.files,
     };
   });

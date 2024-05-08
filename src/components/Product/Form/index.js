@@ -1,3 +1,5 @@
+// we will continue this for image ...
+
 import React, {
   Suspense,
   useEffect,
@@ -27,7 +29,10 @@ import {
   ACTIONS,
   OPERATIONS,
   SNACKBAR_DETAILS,
+  VALIDATION_MESSAGES,
 } from "../../../utils/variables";
+import { validateFile } from "../../../utils/function";
+import { Close } from "@mui/icons-material";
 
 const STATUS_LIST = [
   { id: "status_1", name: "Available" },
@@ -48,7 +53,10 @@ function Form(props) {
   const imageRef = useRef(null);
 
   const [formIsValid, setFormIsValid] = useState(false);
-  const [imageName, setImageName] = useState(null);
+  const [imageState, setImageState] = useState({
+    value: "",
+    isValid: null,
+  });
 
   const [bookNameState, dispatchBookName] = useReducer(nameReducer, {
     value: "",
@@ -74,19 +82,43 @@ function Form(props) {
     isValid: null,
   });
 
+  const clearImagesHandler = () => {
+    if (props.action == ACTIONS.UPDATE) {
+      setImageState({ value: "", isValid: null });
+    } else {
+      setImageState({ value: "", isValid: false });
+    }
+  };
+
   const imageChangeHandler = (event) => {
     let name = "";
     const files = event.target.files;
-    if (files[0]) {
-      Object.keys(files).forEach((key, index) => {
-        if (index < files.length) {
-          name += files[key].name + ", ";
+    if (files.length > 0) {
+      let isValid = true;
+
+      for (let i = 0; i < files.length; i++) {
+        name += files[i].name + ", ";
+        // we are double checking so that next time it won't call function if it finds first value to false
+        // we are not breaking loop for dusplaying names
+        if (isValid && !validateFile(files[i])) {
+          isValid = false;
         }
-      });
+      }
+
+      name = name.slice(0, -2);
+      if (!isValid) {
+        event.target.value = null;
+        setImageState({ value: name, isValid: false });
+        return;
+      }
+      setImageState({ value: name, isValid: true });
+    } else if (props.action == ACTIONS.UPDATE) {
+      setImageState({ value: "", isValid: null });
+    } else {
+      setImageState({ value: name, isValid: false });
     }
-    name = name.slice(0, -2);
-    setImageName(name);
   };
+
   const bookNameChangeHandler = (event) => {
     dispatchBookName({
       type: "USER_INPUT",
@@ -169,17 +201,20 @@ function Form(props) {
   const { isValid: descriptionIsValid } = descriptionState;
   const { isValid: priceIsValid } = priceState;
   const { isValid: quantityIsValid } = quantityState;
-  const imageIsValid = imageName !== "" && imageName !== null;
+  const { isValid: imageIsValid } = imageState;
   useEffect(() => {
     // this will check for image validity only if add action is performed
     const timer = setTimeout(() => {
+      // here we are allowing empty image input for update mode
+      const imageValidity =
+        props.action == ACTIONS.UPDATE ? imageIsValid != false : imageIsValid;
       setFormIsValid(
         bookNameIsValid &&
           authorNameIsValid &&
           descriptionIsValid &&
           priceIsValid &&
           quantityIsValid &&
-          (props.action == ACTIONS.UPDATE || imageIsValid)
+          imageValidity
       );
     }, 500);
     return () => {
@@ -205,23 +240,33 @@ function Form(props) {
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
-    if (imageName == null) {
-      setImageName("");
+    // here we are using if else so that it will focus all invalid feilds and
+    // move to next invalid feild meanwhile prevoius fields get's unfocused
+    // and validateHandler will run for that feild and make isvalid to false instead of null
+
+    // here we are using this logic so that it's isValid became false instead of null
+    if (!imageIsValid) {
+      if (props.action == ACTIONS.DEFAULT) {
+        setImageState({
+          value: imageState.value,
+          isValid: false,
+        });
+      }
     }
     if (!descriptionIsValid) {
-      descriptionRef.current.focus();
+      descriptionRef.current.onInvalid();
     }
     if (!quantityIsValid) {
-      quantityRef.current.focus();
+      quantityRef.current.onInvalid();
     }
     if (!priceIsValid) {
-      priceRef.current.focus();
+      priceRef.current.onInvalid();
     }
     if (!authorNameIsValid) {
-      authorNameRef.current.focus();
+      authorNameRef.current.onInvalid();
     }
     if (!bookNameIsValid) {
-      bookNameRef.current.focus();
+      bookNameRef.current.onInvalid();
     }
   };
   const submitFormHandler = async (event) => {
@@ -245,14 +290,19 @@ function Form(props) {
         await addProduct(productData);
 
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_ADD_ITEM }));
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
-      } finally {
         dispatch(
           uiActions.setOperationState({
-            status: true,
+            status: false,
             activity: OPERATIONS.FETCH,
           })
         );
@@ -274,14 +324,19 @@ function Form(props) {
       try {
         await updateProduct(props.selectedId, filteredProductData);
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UPDATE_ITEM }));
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
-      } finally {
         dispatch(
           uiActions.setOperationState({
-            status: true,
+            status: false,
             activity: OPERATIONS.FETCH,
           })
         );
@@ -294,6 +349,25 @@ function Form(props) {
       onSubmit={formIsValid ? submitFormHandler : validateFormHandler}
       method="post"
     >
+      {/* This is just for validations, added here other wise it will push specific input tag to down */}
+      {(bookNameIsValid == false || authorNameIsValid == false) && (
+        <div className={classes["row-inp"]}>
+          <div>
+            {bookNameIsValid == false && (
+              <span className={classes["invalid-txt"]}>
+                {VALIDATION_MESSAGES.NAME}
+              </span>
+            )}
+          </div>
+          <div>
+            {authorNameIsValid == false && (
+              <span className={classes["invalid-txt"]}>
+                {VALIDATION_MESSAGES.NAME}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       <div className={classes["row-inp"]}>
         <Input
           ref={bookNameRef}
@@ -316,6 +390,26 @@ function Form(props) {
           isValid={authorNameIsValid}
         />
       </div>
+
+      {/* This is just for validations, added here other wise it will push specific input tag to down */}
+      {(priceIsValid == false || quantityIsValid == false) && (
+        <div className={classes["row-inp"]}>
+          <div>
+            {priceIsValid == false && (
+              <span className={classes["invalid-txt"]}>
+                {VALIDATION_MESSAGES.NUMBER}
+              </span>
+            )}
+          </div>
+          <div>
+            {quantityIsValid == false && (
+              <span className={classes["invalid-txt"]}>
+                {VALIDATION_MESSAGES.NUMBER}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       <div className={classes["row-inp"]}>
         <Input
           ref={priceRef}
@@ -338,6 +432,12 @@ function Form(props) {
           isValid={quantityIsValid}
         />
       </div>
+
+      {descriptionIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.DESCRIPTION}
+        </span>
+      )}
       <Input
         ref={descriptionRef}
         type="text"
@@ -349,18 +449,43 @@ function Form(props) {
         isValid={descriptionIsValid}
       />
 
-      <Input
-        ref={imageRef}
-        type="file"
-        placeholder="Add image"
-        onChange={imageChangeHandler}
-        name="images"
-        label={imageName}
-        isValid={imageName !== "" || props.action == ACTIONS.UPDATE}
-        value={imageRef?.current?.files || ""}
-        multiple={true}
-      />
-      <div className={classes["row-inp"]} style={{ marginBottom: "2rem" }}>
+      {/* we need to check for image as well */}
+      {imageIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.IMAGE}
+        </span>
+      )}
+      <div style={{ position: "relative" }}>
+        <Input
+          ref={imageRef}
+          type="file"
+          placeholder={
+            props.action == ACTIONS.UPDATE
+              ? "Add New Image (Optional) "
+              : "Add Image"
+          }
+          onChange={imageChangeHandler}
+          name="images"
+          label={imageState.value}
+          isValid={imageIsValid}
+          value={imageRef?.current?.files || ""}
+          multiple={true}
+        />
+        {imageState.value != "" && (
+          <Close
+            sx={{
+              cursor: "pointer",
+              position: "absolute",
+              right: "1rem",
+              top: "1.5rem",
+              fontSize: "2rem",
+              color: "var(--primary-font-color)",
+            }}
+            onClick={clearImagesHandler}
+          />
+        )}
+      </div>
+      <div className={classes["row-inp"]}>
         <Suspense>
           <Await resolve={loaderData}>
             {(categoryList) => (

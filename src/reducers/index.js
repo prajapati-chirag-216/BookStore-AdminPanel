@@ -132,6 +132,7 @@ export const passwordReducer = (state, action) => {
         !state.value.trim().toLowerCase().includes("password"),
     };
   }
+
   return { value: "", isValid: null };
 };
 

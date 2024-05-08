@@ -19,12 +19,19 @@ import UsersPage from "./pages/UsersPage";
 import ProtectedRoutes, {
   loader as profileLoader,
 } from "./routes/ProtectedRoutes";
+import PrivateRoutes, {
+  loader as varifyProfileLoader,
+} from "./routes/PrivateRoutes";
 import { loader as categoryLoader } from "./components/Product/Form";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Wrapper />} errorElement={<Error />}>
-      <Route index element={<Navigate to="/home" />} />
+      <Route
+        index
+        element={<PrivateRoutes destination="/home" />}
+        loader={varifyProfileLoader}
+      />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/home" />} />

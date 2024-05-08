@@ -7,7 +7,11 @@ import { loginAdmin } from "../../../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { uiActions } from "../../../store/ui-slice";
-import { SNACKBAR_DETAILS, STATUS } from "../../../utils/variables";
+import {
+  SNACKBAR_DETAILS,
+  STATUS,
+  VALIDATION_MESSAGES,
+} from "../../../utils/variables";
 
 function Form() {
   const navigate = useNavigate();
@@ -57,11 +61,16 @@ function Form() {
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
+    // here we are using if else so that it will focus all invalid feilds and
+    // move to next invalid feild meanwhile prevoius fields get's unfocused
+    // and validateHandler will run for that feild and make isvalid to false instead of null
+
+    // here we are using this logic for all feilds so that it's isValid became false instead of null
     if (!passwordIsValid) {
-      passwordRef.current.focus();
+      passwordRef.current.onInvalid();
     }
     if (!emailIsValid) {
-      emailRef.current.focus();
+      emailRef.current.onInvalid();
     }
   };
   const dispatch = useDispatch();
@@ -93,6 +102,11 @@ function Form() {
       onSubmit={formIsValid ? submitFormHandler : validateFormHandler}
       method="post"
     >
+      {emailIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.EMAIL}
+        </span>
+      )}
       <Input
         ref={emailRef}
         type="text"
@@ -103,6 +117,11 @@ function Form() {
         value={emailState.value}
         isValid={emailIsValid}
       />
+      {passwordIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.PASSWORD}
+        </span>
+      )}
       <Input
         ref={passwordRef}
         type="password"

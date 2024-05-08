@@ -193,6 +193,21 @@ export const SNACKBAR_DETAILS = {
 
 export const STEP_LABELS_ORDER_STATUS = ["Pending", "Shipped", "Reaching"];
 
+export const VALIDATION_MESSAGES = {
+  NAME: "Name: 5-30 characters, cannot start with a number.",
+  EMAIL: "Enter a valid email address.",
+  PASSWORD: "Password: 6-10 characters, avoid 'password'.",
+  PHONENO: "Enter a valid phone number.",
+  NUMBER: "Enter a valid number > 0.",
+  GENERAL: "Enter 6-300 characters.",
+  PINCODE: "Enter a valid 6-digit PIN code.",
+  CARDNO: "Enter a valid 14-digit card number.",
+  CVV: "CVV: 3-4 digits.",
+  EXPIRYDATE: "Enter a valid expiry date.",
+  DESCRIPTION: "Description: 40-400 characters.",
+  IMAGE: "Image is required (jpeg,png,jpg)",
+};
+
 export const ADMIN_COLUMNS = [
   { id: "id", label: "Id", minWidth: 100 },
   { id: "name", label: "Name", minWidth: 100 },

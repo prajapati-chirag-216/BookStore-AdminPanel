@@ -1,3 +1,5 @@
+// we will continue this for image ...
+
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import classes from "./index.module.css";
 import Input from "../../Input";
@@ -8,9 +10,12 @@ import {
   ACTIONS,
   OPERATIONS,
   SNACKBAR_DETAILS,
+  VALIDATION_MESSAGES,
 } from "../../../utils/variables";
 import { useDispatch } from "react-redux";
 import { uiActions } from "../../../store/ui-slice";
+import { validateFile } from "../../../utils/function";
+import { Close } from "@mui/icons-material";
 
 function Form(props) {
   const categoryNameRef = useRef(null);
@@ -18,7 +23,10 @@ function Form(props) {
   const dispatch = useDispatch();
 
   const [formIsValid, setFormIsValid] = useState(false);
-  const [imageName, setImageName] = useState(null);
+  const [imageState, setImageState] = useState({
+    value: "",
+    isValid: null,
+  });
 
   const [categoryNameState, dispatchCategoryName] = useReducer(nameReducer, {
     value: "",
@@ -31,42 +39,69 @@ function Form(props) {
       value: event.target.value.trimStart(),
     });
   };
-  const validateFile = (file) => {
-    const allowedExtensions = ["jpg", "jpeg", "png"];
-    const fileExtension = file.name.split(".").pop().toLowerCase();
 
-    return allowedExtensions.includes(fileExtension);
+  // const imageChangeHandler = (event) => {
+  //   let name = "";
+  //   const files = event.target.files;
+
+  //   let isValid = true;
+  //   if (files.length > 0) {
+  //     for (let i = 0; i < files.length; i++) {
+  //       if (!validateFile(files[i])) {
+  //         isValid = false;
+  //         break;
+  //       }
+  //     }
+
+  //     if (!isValid) {
+  //       event.target.value = null;
+  //       setImageName("");
+  //       return;
+  //     }
+
+  //     Object.keys(files).forEach((key, index) => {
+  //       if (index < files.length) {
+  //         name += files[key].name + ", ";
+  //       }
+  //     });
+  //     name = name.slice(0, -2);
+  //   }
+  //   name = name.slice(0, -2);
+  //   setImageName(name);
+  // };
+  const clearImagesHandler = () => {
+    if (props.action == ACTIONS.UPDATE) {
+      setImageState({ value: "", isValid: null });
+    } else {
+      setImageState({ value: "", isValid: false });
+    }
   };
-
   const imageChangeHandler = (event) => {
     let name = "";
     const files = event.target.files;
 
-    let isValid = true;
     if (files.length > 0) {
+      let isValid = true;
+
       for (let i = 0; i < files.length; i++) {
-        if (!validateFile(files[i])) {
+        name += files[i].name + ", ";
+        // we are ouble checking so that next time it won't call function if it finds first value to false
+        // we are not breaking loop for dusplaying names
+        if (isValid && !validateFile(files[i])) {
           isValid = false;
-          break;
         }
       }
 
+      name = name.slice(0, -2);
       if (!isValid) {
-        alert("Please upload only jpg, jpeg, or png files.");
         event.target.value = null;
-        setImageName("");
+        setImageState({ value: name, isValid: false });
         return;
       }
-
-      Object.keys(files).forEach((key, index) => {
-        if (index < files.length) {
-          name += files[key].name + ", ";
-        }
-      });
-      name = name.slice(0, -2);
+      setImageState({ value: name, isValid: true });
+      return;
     }
-    name = name.slice(0, -2);
-    setImageName(name);
+    setImageState({ value: name, isValid: false });
   };
 
   const fillFormHandler = async () => {
@@ -82,15 +117,15 @@ function Form(props) {
     dispatchCategoryName({ type: "INPUT_BLUR" });
 
   const { isValid: categoryNameIsValid } = categoryNameState;
-  const imageIsValid = imageName !== "" && imageName !== null;
+  const { isValid: imageIsValid } = imageState;
 
   // this useEffect is for form validation
   useEffect(() => {
     const timer = setTimeout(() => {
       // this will check for image validity only if add action is performed
-      setFormIsValid(
-        categoryNameIsValid && (props.action == ACTIONS.UPDATE || imageIsValid)
-      );
+      const imageValidity =
+        props.action == ACTIONS.UPDATE ? imageIsValid != false : imageIsValid;
+      setFormIsValid(categoryNameIsValid && imageValidity);
     }, 500);
     return () => {
       clearTimeout(timer);
@@ -108,11 +143,22 @@ function Form(props) {
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
-    if (!categoryNameIsValid) {
-      categoryNameRef.current.focus();
+    // here we are using if else so that it will focus all invalid feilds and
+    // move to next invalid feild meanwhile prevoius fields get's unfocused
+    // and validateHandler will run for that feild and make isvalid to false instead of null
+
+    // here we are using this logic so that it's isValid became false instead of null
+    if (!imageIsValid) {
+      if (props.action == ACTIONS.DEFAULT) {
+        setImageState({
+          value: imageState.value,
+          isValid: false,
+        });
+      }
     }
-    if (imageName == null) {
-      setImageName("");
+    if (!categoryNameIsValid) {
+      // here we are using this logic so that it's isValid became false instead of null
+      categoryNameRef.current.onInvalid();
     }
   };
 
@@ -132,17 +178,23 @@ function Form(props) {
         dispatch(
           uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_ADD_CATEGORY })
         );
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
+        dispatch(
+          uiActions.setOperationState({
+            status: false,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       }
-      dispatch(
-        uiActions.setOperationState({
-          status: true,
-          activity: OPERATIONS.FETCH,
-        })
-      );
     } else if (props.action == ACTIONS.UPDATE) {
       const filteredCategoryData = Object.fromEntries(
         Object.entries(categoryData).filter(
@@ -161,17 +213,23 @@ function Form(props) {
           dispatch(
             uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UPDATE_CATEGORY })
           );
+          dispatch(
+            uiActions.setOperationState({
+              status: true,
+              activity: OPERATIONS.FETCH,
+            })
+          );
         } catch (err) {
           if (err?.response?.status == 500) {
             dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
           }
+          dispatch(
+            uiActions.setOperationState({
+              status: false,
+              activity: OPERATIONS.FETCH,
+            })
+          );
         }
-        dispatch(
-          uiActions.setOperationState({
-            status: true,
-            activity: OPERATIONS.FETCH,
-          })
-        );
       } else {
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_DEFAULT }));
       }
@@ -184,6 +242,11 @@ function Form(props) {
       method="post"
       id="myForm"
     >
+      {categoryNameIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.NAME}
+        </span>
+      )}
       <Input
         ref={categoryNameRef}
         type="text"
@@ -195,16 +258,41 @@ function Form(props) {
         value={categoryNameState.value}
       />
       {/* we need to check for image as well */}
-      <Input
-        ref={imageRef}
-        type="file"
-        placeholder="Add image"
-        onChange={imageChangeHandler}
-        name="images"
-        label={imageName}
-        isValid={imageName !== "" || props.action == ACTIONS.UPDATE}
-        multiple={false}
-      />
+      {imageIsValid == false && props.action == ACTIONS.DEFAULT && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.IMAGE}
+        </span>
+      )}
+      <div style={{ position: "relative" }}>
+        <Input
+          ref={imageRef}
+          type="file"
+          placeholder={
+            props.action == ACTIONS.UPDATE
+              ? "Add New Image (Optional) "
+              : "Add Image"
+          }
+          onChange={imageChangeHandler}
+          name="images"
+          label={imageState.value}
+          isValid={imageIsValid}
+          value={imageRef?.current?.files || ""}
+          multiple={false}
+        />
+        {imageState.value != "" && (
+          <Close
+            sx={{
+              cursor: "pointer",
+              position: "absolute",
+              right: "1rem",
+              top: "1.5rem",
+              fontSize: "2rem",
+              color: "var(--primary-font-color)",
+            }}
+            onClick={clearImagesHandler}
+          />
+        )}
+      </div>
       <Button className="btn-large">Submit</Button>
     </form>
   );

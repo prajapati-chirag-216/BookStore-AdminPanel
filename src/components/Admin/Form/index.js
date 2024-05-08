@@ -10,6 +10,7 @@ import {
   ROLES,
   ROLES_LIST,
   SNACKBAR_DETAILS,
+  VALIDATION_MESSAGES,
 } from "../../../utils/variables";
 import { uiActions } from "../../../store/ui-slice";
 import { addAdmin, getAdmin, getAdmins, updateAdmin } from "../../../utils/api";
@@ -50,10 +51,18 @@ function Form(props) {
     });
   };
   const passwordChangeHandler = (event) => {
-    dispatchPassword({
-      type: "USER_INPUT",
-      value: event.target.value.trimStart(),
-    });
+    if (props.action == ACTIONS.UPDATE && event.target.value == "") {
+      // it will return default state (because passed without type)
+      dispatchPassword({
+        type: "DEFAULT",
+        value: "",
+      });
+    } else {
+      dispatchPassword({
+        type: "USER_INPUT",
+        value: event.target.value.trimStart(),
+      });
+    }
   };
 
   const fillFormHandler = async () => {
@@ -75,16 +84,26 @@ function Form(props) {
   // this will run on input gets out from focus
   const validateNameHandler = () => dispatchName({ type: "INPUT_BLUR" });
   const validateEmailHandler = () => dispatchEmail({ type: "INPUT_BLUR" });
-  const validatePasswordHandler = () =>
-    dispatchPassword({ type: "INPUT_BLUR" });
+  const validatePasswordHandler = () => {
+    if (props.action == ACTIONS.UPDATE && passwordState.value == "") {
+      // it will return default state (because passed without type)
+      dispatchPassword({ type: "DEFAULT" });
+    } else {
+      dispatchPassword({ type: "INPUT_BLUR" });
+    }
+  };
 
   const { isValid: nameIsValid } = nameState;
   const { isValid: emailIsValid } = emailState;
   const { isValid: passwordIsValid } = passwordState;
 
   useEffect(() => {
+    const passwordValidity =
+      props.action == ACTIONS.UPDATE
+        ? passwordIsValid != false
+        : passwordIsValid;
     const timer = setTimeout(() => {
-      setFormIsValid(nameIsValid && emailIsValid && passwordIsValid);
+      setFormIsValid(nameIsValid && emailIsValid && passwordValidity);
     }, 500);
     return () => {
       clearTimeout(timer);
@@ -102,14 +121,24 @@ function Form(props) {
 
   const validateFormHandler = async (event) => {
     event.preventDefault();
+    // here we are using if else so that it will focus all invalid feilds and
+    // move to next invalid feild meanwhile prevoius fields get's unfocused
+    // and validateHandler will run for that feild and make isvalid to false instead of null
+
+    // here we are using this logic for all feilds so that it's isValid became false instead of null
     if (!passwordIsValid) {
-      passwordRef.current.focus();
+      if (
+        (props.action == ACTIONS.UPDATE && passwordState.value != "") ||
+        props.action == ACTIONS.DEFAULT
+      ) {
+        passwordRef.current.onInvalid();
+      }
     }
     if (!emailIsValid) {
-      emailRef.current.focus();
+      emailRef.current.onInvalid();
     }
     if (!nameIsValid) {
-      nameRef.current.focus();
+      nameRef.current.onInvalid();
     }
   };
   const submitFormHandler = async (event) => {
@@ -134,17 +163,23 @@ function Form(props) {
               : { ...SNACKBAR_DETAILS.ON_ADD_EMPLOYEE }
           )
         );
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
+        dispatch(
+          uiActions.setOperationState({
+            status: false,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       }
-      dispatch(
-        uiActions.setOperationState({
-          status: true,
-          activity: OPERATIONS.FETCH,
-        })
-      );
     } else if (props.action == ACTIONS.UPDATE) {
       const filteredAdminData = Object.fromEntries(
         Object.entries(adminData).filter(([_, value]) => value !== "" && value)
@@ -165,17 +200,23 @@ function Form(props) {
                 : { ...SNACKBAR_DETAILS.ON_UPDATE_EMPLOYEE }
             )
           );
+          dispatch(
+            uiActions.setOperationState({
+              status: true,
+              activity: OPERATIONS.FETCH,
+            })
+          );
         } catch (err) {
           if (err?.response?.status == 500) {
             dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
           }
+          dispatch(
+            uiActions.setOperationState({
+              status: false,
+              activity: OPERATIONS.FETCH,
+            })
+          );
         }
-        dispatch(
-          uiActions.setOperationState({
-            status: true,
-            activity: OPERATIONS.FETCH,
-          })
-        );
       } else {
         dispatch(uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_DEFAULT }));
       }
@@ -188,6 +229,11 @@ function Form(props) {
       onSubmit={formIsValid ? submitFormHandler : validateFormHandler}
       method="post"
     >
+      {nameIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.NAME}
+        </span>
+      )}
       <Input
         ref={nameRef}
         type="text"
@@ -199,6 +245,11 @@ function Form(props) {
         isValid={nameIsValid}
       />
 
+      {emailIsValid == false && (
+        <span className={classes["invalid-txt"]}>
+          {VALIDATION_MESSAGES.EMAIL}
+        </span>
+      )}
       <Input
         ref={emailRef}
         type="text"
@@ -209,12 +260,34 @@ function Form(props) {
         value={emailState.value}
         isValid={emailIsValid}
       />
+
+      {/* validation for password 
+      used another div so that ui not get's breaked */}
+      {/* This is just for validations, added here other wise it will push specific input tag to down */}
+      {passwordIsValid == false && (
+        <div className={classes["row-inp"]}>
+          <div>
+            {passwordIsValid == false && (
+              <span className={classes["invalid-txt"]}>
+                {VALIDATION_MESSAGES.PASSWORD}
+              </span>
+            )}
+          </div>
+          {/* we can add validation message for selector as well.
+              if we were implemented `default select to --no-select--` */}
+        </div>
+      )}
+
       {/*  we need to check for password as well */}
       <div className={classes["row-inp"]}>
         <Input
           ref={passwordRef}
           type="password"
-          placeholder="Password"
+          placeholder={
+            props.action == ACTIONS.UPDATE
+              ? "New Password (Optional) "
+              : "Password"
+          }
           onChange={passwordChangeHandler}
           onBlur={validatePasswordHandler}
           name="password"
@@ -232,7 +305,6 @@ function Form(props) {
           options={ROLES_LIST}
         />
       </div>
-
       <Button className="btn-large">Submit</Button>
     </form>
   );

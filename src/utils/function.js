@@ -71,6 +71,13 @@ export const formateDate = (value) => {
   return { tempDate, isValid };
 };
 
+export const validateFile = (file) => {
+  const allowedExtensions = ["jpg", "jpeg", "png"];
+  const fileNameParts = file.name.split(".");
+  const fileExtension = fileNameParts[fileNameParts.length - 1].toLowerCase();
+  return allowedExtensions.includes(fileExtension);
+};
+
 // this will accept `categoryData`, `onUpdate` and `onDelete` functions for updating or deleting category
 // and return filled rows of table with data
 export const createCategoryRows = (categoryData, onUpdate, onDelete) => {

@@ -1,18 +1,25 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { Outlet } from "react-router-dom";
-import { selectSuccess } from "../store/ui/ui.selector";
+import { Navigate, redirect, useLoaderData } from "react-router-dom";
+import { fetchAdminProfile } from "../utils/api";
 
 const PrivateRoutes = (props) => {
-  const success = useSelector(selectSuccess);
-  try {
-    if (success.status) {
-      return <Outlet context={{ for: success.for }} />;
-    }
-    throw { message: props.message, status: 404 };
-  } catch (err) {
-    throw err;
-  }
+  const loaderData = useLoaderData();
+
+  return loaderData.adminProfile ? (
+    <Navigate to={props.destination} replace />
+  ) : (
+    <Navigate to="/auth" replace />
+  );
 };
 
+export async function loader() {
+  let res;
+  try {
+    const adminProfile = await fetchAdminProfile();
+    res = { adminProfile };
+  } catch (err) {
+    return redirect("/auth");
+  }
+  return res;
+}
 export default PrivateRoutes;

@@ -65,6 +65,12 @@ function Order() {
       if (err?.response?.status == 500) {
         dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
       }
+      dispatch(
+        uiActions.setOperationState({
+          status: false,
+          activity: OPERATIONS.FETCH,
+        })
+      );
     }
   };
 

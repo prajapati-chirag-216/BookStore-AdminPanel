@@ -55,14 +55,19 @@ function Form(props) {
         dispatch(
           uiActions.setSnackBar({ ...SNACKBAR_DETAILS.ON_UPDATE_ORDER })
         );
+        dispatch(
+          uiActions.setOperationState({
+            status: true,
+            activity: OPERATIONS.FETCH,
+          })
+        );
       } catch (err) {
         if (err?.response?.status == 500) {
           dispatch(uiActions.setSnackBar(SNACKBAR_DETAILS.ON_ERROR));
         }
-      } finally {
         dispatch(
           uiActions.setOperationState({
-            status: true,
+            status: false,
             activity: OPERATIONS.FETCH,
           })
         );
